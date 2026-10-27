@@ -1,0 +1,911 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>유해정보 리터러시 수업 꾸러미</title><style>*,*::before,*::after{box-sizing:border-box}body{margin:0}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;600;700&family=Jua&family=Nanum+Gothic+Coding:wght@400;700&family=Nanum+Myeongjo:wght@400;800&family=Noto+Sans+KR:wght@200;400;500;700;900&display=swap">
+<style>
+/* Layout concept: a sticky teacher/student switch on top, then ten full-width bands.
+   Each band is its own poster (palette, display face, grid and motif) built from the same slots:
+   header, motif, panel, downloads. Chrome tokens are --k-*, lesson tokens are --bg/--fg/--ac per band. */
+:root{
+  --k-bg:#F2F3F5; --k-sf:#FFFFFF; --k-fg:#14161B; --k-mu:#586070; --k-ln:#D5D9E0; --k-ink:#14161B; --k-on:#FFFFFF;
+  --sans:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --k-bg:#0E0F12; --k-sf:#17191E; --k-fg:#ECEEF2; --k-mu:#9AA1B0; --k-ln:#2A2E37; --k-ink:#ECEEF2; --k-on:#0E0F12; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --k-bg:#0E0F12; --k-sf:#17191E; --k-fg:#ECEEF2; --k-mu:#9AA1B0; --k-ln:#2A2E37; --k-ink:#ECEEF2; --k-on:#0E0F12; color-scheme:dark }
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--k-bg);color:var(--k-fg);font-family:var(--sans);line-height:1.6;font-size:16px;-webkit-text-size-adjust:100%;word-break:keep-all;overflow-wrap:break-word}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--k-bg)}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #2F6BFF;outline-offset:2px}
+.wrap{max-width:1160px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--k-bg);border-bottom:1px solid var(--k-ln)}
+.topbar .wrap{display:flex;align-items:center;gap:14px 20px;padding-block:10px;flex-wrap:wrap}
+.brand{font-weight:900;letter-spacing:-.02em;font-size:15px;margin-right:auto;white-space:nowrap}
+.seg{display:inline-flex;border:1.5px solid var(--k-ink);border-radius:999px;padding:2px}
+.seg button{border:0;background:transparent;padding:6px 16px;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--k-ink);color:var(--k-on)}
+.jump{display:flex;gap:4px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+.jump a{flex:none;width:30px;height:30px;display:grid;place-items:center;text-decoration:none;font-weight:700;font-size:13px;border-radius:8px;font-variant-numeric:tabular-nums}
+.jump a:hover{background:var(--k-ln)}
+.hero{padding-block:clamp(40px,7vw,96px)}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:clamp(24px,5vw,72px);align-items:end}
+.hero h1{margin:0 0 20px;font-weight:900;letter-spacing:-.045em;line-height:1.08;font-size:clamp(34px,5.6vw,72px);text-wrap:balance}
+.hero p{margin:0;color:var(--k-mu);max-width:44ch}
+.five{list-style:none;margin:0;padding:0;border-top:2px solid var(--k-ink)}
+.five li{display:grid;grid-template-columns:6.4em 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--k-ln);align-items:baseline}
+.five b{font-weight:900;font-size:18px}
+.five span{color:var(--k-mu);font-size:15px}
+.all{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.kbtn{border:1.5px solid var(--k-ink);background:transparent;border-radius:10px;padding:10px 16px;cursor:pointer;font-weight:700;font-size:14px}
+.kbtn:hover{background:var(--k-ink);color:var(--k-on)}
+.kbtn small{opacity:.7;font-weight:500;margin-left:4px}
+body[data-mode="student"] .t-only{display:none!important}
+body[data-mode="teacher"] .s-only{display:none!important}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#14161B;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;max-width:calc(100% - 32px);text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+footer{padding-block:48px 64px;color:var(--k-mu);font-size:14px}
+footer p{margin:0 0 8px;max-width:70ch}
+
+/* ===== lesson bands: shared ===== */
+.lesson{background:var(--bg);color:var(--fg);padding-block:clamp(44px,7vw,96px);scroll-margin-top:60px;overflow:hidden}
+.lesson .in{max-width:1160px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.grid{display:grid;gap:clamp(20px,3.6vw,48px);grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.hd{grid-area:hd;min-width:0}.mo{grid-area:mo;min-width:0}.pn{grid-area:pn;min-width:0}.dl{grid-area:dl;min-width:0}
+.sub{margin:0 0 10px;font-size:14px;font-weight:700;color:var(--mu)}
+.hd h2{margin:0 0 12px;line-height:1.12;text-wrap:balance}
+.q{margin:0;font-size:clamp(17px,2vw,22px);line-height:1.5;max-width:30em}
+.pn{background:var(--pn);color:var(--pnfg);padding:clamp(18px,2.6vw,30px);border-radius:var(--rad,12px);border:var(--pnb,0)}
+.pn h3{margin:22px 0 8px;font-size:13px;font-weight:900;letter-spacing:.08em;color:var(--ac2,var(--ac))}
+.pn h3:first-child{margin-top:0}
+.pn h3 small{font-weight:500;letter-spacing:0;opacity:.7;margin-left:6px}
+.pn ol,.pn ul{margin:0;padding-left:1.25em}
+.pn li{margin:0 0 6px;font-size:15px}
+.pn p{margin:0;font-size:15px}
+.goals{list-style:none;padding-left:0!important;counter-reset:g}
+.goals li{counter-increment:g;display:grid;grid-template-columns:1.6em 1fr;gap:4px}
+.goals li::before{content:counter(g);font-weight:900;color:var(--ac2,var(--ac))}
+.flow{display:flex;gap:3px;margin-bottom:10px}
+.flow i{font-style:normal;background:var(--ac);color:var(--on);padding:6px 8px;font-size:13px;border-radius:4px;display:flex;justify-content:space-between;gap:6px;min-width:0}
+.flow i:nth-child(2){opacity:.82}.flow i:nth-child(3){opacity:.64}
+.fl{list-style:none;padding-left:0!important}
+.fl li{display:grid;grid-template-columns:3em 1fr;gap:8px;font-size:14px}
+.fl b{color:var(--ac2,var(--ac))}
+.nts li{font-size:14px}
+.todo{list-style:none;padding-left:0!important}
+.todo li{font-size:clamp(16px,1.8vw,19px);padding:10px 0;border-bottom:1px solid var(--ln);margin:0}
+.todo li:last-child{border-bottom:0}
+.dl .t-only,.dl .s-only{display:flex;flex-wrap:wrap;gap:10px}
+.btn{border:2px solid var(--ac);background:transparent;color:var(--fg);border-radius:var(--rad,10px);padding:11px 16px;cursor:pointer;font-weight:700;font-size:15px;min-height:44px}
+.btn.main{background:var(--ac);color:var(--on)}
+.btn small{font-weight:500;opacity:.75;margin-left:4px}
+.btn:hover{filter:brightness(1.08)}
+.cap{margin:12px 0 0;font-size:14px;opacity:.85}
+
+/* ===== 1 보건: 판정 용지 ===== */
+.l1{--bg:#E4F5EE;--fg:#0A2A24;--ac:#00A184;--on:#fff;--pn:#fff;--pnfg:#0A2A24;--ln:#BFE3D7;--mu:#3F6A60;--ac2:#00806A;--rad:6px}
+.l1 .grid{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-areas:"hd mo" "pn mo" "dl mo"}
+.l1 .no{font-weight:900;font-size:clamp(90px,14vw,170px);line-height:.8;color:var(--ac);margin-bottom:14px;letter-spacing:-.06em}
+.l1 h2{font-weight:900;font-size:clamp(32px,4.6vw,56px);letter-spacing:-.04em}
+.l1 .form{background:#fff;border:2px solid #0A2A24;border-radius:6px;padding:20px;box-shadow:8px 8px 0 #0A2A24}
+.l1 .form-t{font-weight:900;font-size:13px;letter-spacing:.14em;border-bottom:2px solid #0A2A24;padding-bottom:10px;margin-bottom:6px}
+.l1 label{display:grid;grid-template-columns:26px 4.2em 1fr;gap:10px;align-items:center;padding:12px 0;border-bottom:1px dashed #9CCFC0}
+.l1 label i{width:22px;height:22px;border:2px solid #0A2A24;border-radius:3px;display:block;position:relative}
+.l1 label:nth-of-type(-n+3) i::after{content:"";position:absolute;left:5px;top:0;width:6px;height:12px;border:solid var(--ac);border-width:0 3px 3px 0;transform:rotate(40deg)}
+.l1 label b{font-weight:900}.l1 label span{font-size:15px}
+.l1 .verdict{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.l1 .verdict span{border:2px solid #0A2A24;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700}
+.l1 .verdict .hl{background:#0A2A24;color:#fff}
+
+/* ===== 2 사서: 청구기호 카드 ===== */
+.l2{--bg:#D6E0EB;--fg:#142547;--ac:#C23B2E;--on:#fff;--pn:#F4F7FB;--pnfg:#142547;--ln:#A4B5CB;--mu:#4A5C7C;--rad:2px;--pnb:1px solid #A4B5CB}
+.l2 .grid{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);grid-template-areas:"mo hd" "mo pn" "mo dl"}
+.l2 .no{display:inline-block;font-family:'Gowun Batang',serif;font-weight:700;font-size:clamp(44px,6vw,72px);line-height:1;border:3px double var(--fg);padding:6px 20px 10px;margin-bottom:18px}
+.l2 h2{font-family:'Gowun Batang',serif;font-weight:700;font-size:clamp(30px,4.2vw,50px);letter-spacing:-.02em}
+.l2 .cat{background:#fff;border:1px solid #8CA0BC;padding:22px 22px 18px;background-image:repeating-linear-gradient(transparent 0 33px,#DCE5EF 33px 34px);box-shadow:0 14px 0 -8px #B9C8DA,0 28px 0 -16px #9FB1C8}
+.l2 .cat-top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:'Nanum Gothic Coding',monospace;font-size:13px;margin-bottom:14px;flex-wrap:wrap}
+.l2 .cat-top em{font-style:normal;font-weight:700;color:var(--ac);border:2px solid var(--ac);padding:3px 10px;transform:rotate(-5deg);letter-spacing:.06em}
+.l2 .cat ol{list-style:none;margin:0;padding:0;counter-reset:c}
+.l2 .cat li{counter-increment:c;display:grid;grid-template-columns:2.2em 1fr;column-gap:6px;padding:10px 0;min-height:68px}
+.l2 .cat li::before{content:counter(c);grid-row:span 2;font-family:'Gowun Batang',serif;font-size:30px;line-height:1;color:var(--ac)}
+.l2 .cat li b{font-family:'Gowun Batang',serif;font-size:19px}
+.l2 .cat li span{font-size:14px;color:#4A5C7C}
+.l2 .cat-foot{margin-top:6px;font-size:14px;border-top:1px solid #8CA0BC;padding-top:10px}
+
+/* ===== 3 기술+사서: 점수판 ===== */
+.l3{--bg:#14151C;--fg:#F1F1F4;--ac:#FF4F8B;--on:#14151C;--pn:#1E2029;--pnfg:#F1F1F4;--ln:#33364A;--mu:#A2A5B8;--rad:4px;font-family:'IBM Plex Sans KR',var(--sans)}
+.l3 .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hd hd" "mo pn" "mo dl";align-items:start}
+.l3 .no{font-family:'Nanum Gothic Coding',monospace;font-weight:700;font-size:clamp(70px,11vw,140px);line-height:.9;color:transparent;-webkit-text-stroke:2px var(--ac);margin-bottom:10px}
+.l3 h2{font-weight:700;font-size:clamp(30px,5.2vw,64px);letter-spacing:-.03em}
+.l3 .rules{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.l3 .rules span{font-family:'Nanum Gothic Coding',monospace;border:1px solid var(--ln);background:#1E2029;border-radius:4px;padding:6px 10px;font-size:14px}
+.l3 .rules .neg{color:var(--ac);border-color:var(--ac)}
+.l3 .bars{display:grid;gap:10px}
+.l3 .bar{position:relative;display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;padding:14px 14px;background:#1E2029;border-radius:4px;overflow:hidden;isolation:isolate}
+.l3 .bar::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:#3A1E34;border-right:3px solid var(--ac);z-index:-1}
+.l3 .bar.neg::before{background:#2A2B36;border-color:#6E7290}
+.l3 .bar b,.l3 .bar em{font-family:'Nanum Gothic Coding',monospace;font-style:normal;font-weight:700}
+.l3 .bar em{font-size:22px;color:var(--ac)}
+
+/* ===== 4 기술 ①: 사건 파일 ===== */
+.l4{--bg:#FFD400;--fg:#111;--ac:#111;--on:#FFD400;--pn:#fff;--pnfg:#111;--ln:#111;--mu:#333;--rad:0;--pnb:3px solid #111;font-family:'Noto Sans KR',sans-serif}
+.l4 .grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"hd" "mo" "pn" "dl"}
+.l4 .no{display:inline-block;background:#111;color:#FFD400;font-family:'Black Han Sans',sans-serif;font-size:clamp(46px,7vw,84px);line-height:1;padding:4px 20px 8px;margin-bottom:16px}
+.l4 h2{font-family:'Black Han Sans',sans-serif;font-weight:400;font-size:clamp(44px,8vw,112px);letter-spacing:-.02em;line-height:1}
+.l4 .q{font-weight:700}
+.l4 .tape{background:repeating-linear-gradient(-45deg,#111 0 14px,#FFD400 14px 28px);padding:10px;margin-bottom:18px}
+.l4 .tape span{display:inline-block;background:#111;color:#FFD400;font-family:'Black Han Sans',sans-serif;font-size:18px;letter-spacing:.12em;padding:4px 14px}
+.l4 .board{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.l4 .vc{background:#fff;border:3px solid #111;padding:10px}
+.l4 .th{aspect-ratio:16/10;background:#111;margin:8px 0}
+.l4 .tg{display:inline-block;background:#111;color:#FFD400;font-weight:900;font-size:13px;padding:1px 8px}
+.l4 .hr s{text-decoration:none;font-size:20px;margin-right:2px}
+.l4 .hr s.h1::before{content:"♥";color:#E5242B}
+.l4 .hr s.h0::before{content:"♡";color:#111}
+.l4 .cases{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.l4 .cases span{background:#111;color:#FFD400;font-weight:900;padding:6px 14px;font-size:14px}
+.l4 .pn h3{color:#111;border-bottom:3px solid #111;padding-bottom:4px}
+.l4 .pn{max-width:none}
+
+/* ===== 5 기술 ②: 청사진 ===== */
+.l5{--bg:#1B3CB8;--fg:#fff;--ac:#BFE6FF;--on:#0E2370;--pn:#152F94;--pnfg:#fff;--ln:#6A85E8;--mu:#C5D2FF;--rad:2px;--pnb:1.5px solid #6A85E8;
+ background-image:linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px);background-size:36px 36px}
+.l5 .grid{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);grid-template-areas:"hd mo" "pn mo" "dl dl"}
+.l5 .no{font-family:'Nanum Gothic Coding',monospace;font-weight:700;font-size:15px;border:1.5px solid #fff;display:inline-block;padding:3px 10px;margin-bottom:16px;letter-spacing:.1em}
+.l5 .no::before{content:"SHEET "}
+.l5 h2{font-family:'Nanum Gothic Coding',monospace;font-weight:700;font-size:clamp(32px,5vw,62px);letter-spacing:-.04em}
+.l5 .phone{width:min(300px,100%);border:3px solid #fff;border-radius:30px;padding:14px;background:#1B3CB8;margin-inline:auto}
+.l5 .scr{background:#0F2A8A;border-radius:18px;padding:14px;display:grid;gap:9px}
+.l5 .ph-t{font-family:'Nanum Gothic Coding',monospace;font-weight:700;font-size:13px;letter-spacing:.1em;color:var(--ac)}
+.l5 .fn{border:1.5px dashed #BFE6FF;border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:center;font-size:15px;font-weight:500}
+.l5 .fn i{width:14px;height:14px;border:2px solid #BFE6FF;border-radius:50%;flex:none}
+.l5 .cap{text-align:center}
+
+/* ===== 6 가정+보건: 전단 ===== */
+.l6{--bg:#E63B2E;--fg:#fff;--ac:#FFE14D;--on:#1A1A1A;--pn:#fff;--pnfg:#1A1A1A;--ac2:#C0291D;--ln:#F2A39D;--mu:#FFE1DE;--rad:0}
+.l6 .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"mo mo" "hd pn" "dl pn"}
+.l6 .no{display:inline-grid;place-items:center;width:clamp(70px,9vw,104px);aspect-ratio:1;background:#FFE14D;color:#1A1A1A;font-family:'Do Hyeon',sans-serif;font-size:clamp(36px,5vw,58px);border-radius:50%;transform:rotate(-8deg);margin-bottom:14px}
+.l6 h2{font-family:'Do Hyeon',sans-serif;font-weight:400;font-size:clamp(40px,6.4vw,80px);letter-spacing:-.01em}
+.l6 .ad{background:#FFE14D;color:#1A1A1A;padding:clamp(18px,3vw,36px);display:grid;grid-template-columns:auto 1fr;gap:clamp(14px,3vw,36px);align-items:center;transform:rotate(-1deg)}
+.l6 .burst{font-family:'Do Hyeon',sans-serif;line-height:.9;display:flex;flex-direction:column}
+.l6 .burst span{font-size:clamp(22px,3.6vw,42px)}
+.l6 .burst strong{font-weight:400;font-size:clamp(90px,15vw,200px);color:#E63B2E;-webkit-text-stroke:3px #1A1A1A;paint-order:stroke fill}
+.l6 .tr s{display:block;font-family:'Do Hyeon',sans-serif;font-size:clamp(22px,3.2vw,38px);text-decoration-thickness:4px;text-decoration-color:#E63B2E}
+.l6 .tr b{display:block;margin-top:10px;font-size:clamp(16px,2vw,22px);background:#1A1A1A;color:#FFE14D;padding:8px 12px}
+.l6 .types{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.l6 .types span{background:#fff;color:#1A1A1A;font-weight:900;padding:5px 12px;font-size:14px;border:2px solid #1A1A1A}
+
+/* ===== 7 가정+사서: 후기 말풍선 ===== */
+.l7{--bg:#E6EFE8;--fg:#17301F;--ac:#E8890C;--on:#fff;--pn:#fff;--pnfg:#17301F;--ac2:#B96A00;--ln:#C4D6C9;--mu:#4C6A54;--rad:22px;font-family:'Jua','Noto Sans KR',sans-serif}
+.l7 .grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);grid-template-areas:"hd pn" "mo pn" "mo dl";align-items:start}
+.l7 .pn,.l7 .pn li,.l7 .pn p{font-family:'Noto Sans KR',sans-serif}
+.l7 .no{display:inline-grid;place-items:center;min-width:70px;height:56px;padding:0 20px;background:#fff;border-radius:28px 28px 28px 6px;font-size:34px;margin-bottom:14px;box-shadow:0 3px 0 #C4D6C9}
+.l7 h2{font-weight:400;font-size:clamp(32px,4.8vw,58px);letter-spacing:-.02em}
+.l7 .bub{background:#fff;border-radius:22px 22px 22px 6px;padding:16px 18px;margin-bottom:12px;max-width:94%;box-shadow:0 3px 0 #C4D6C9}
+.l7 .bub.b{margin-left:auto;background:#F7FBF8;border-radius:22px 22px 6px 22px}
+.l7 .st{color:#E8890C;letter-spacing:.1em;font-size:18px}
+.l7 .bub p{margin:4px 0 6px;font-family:'Noto Sans KR',sans-serif;font-weight:500;font-size:16px}
+.l7 .bub small{font-family:'Noto Sans KR',sans-serif;color:#4C6A54;font-size:13px}
+.l7 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.l7 .chips span{background:#17301F;color:#fff;border-radius:999px;padding:6px 14px;font-size:14px}
+
+/* ===== 8 사회+보건: 계단 ===== */
+.l8{--bg:#0F4C5C;--fg:#EAF6F8;--ac:#FFB84D;--on:#0B2F39;--pn:#0B3B48;--pnfg:#EAF6F8;--ln:#2C7A8C;--mu:#A5CBD3;--rad:10px}
+.l8 .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hd hd" "mo mo" "pn dl";align-items:start}
+.l8 .no{font-weight:200;font-size:clamp(100px,16vw,200px);line-height:.8;color:var(--ac);letter-spacing:-.06em;margin-bottom:6px}
+.l8 h2{font-weight:900;font-size:clamp(32px,5.2vw,64px);letter-spacing:-.04em}
+.l8 .stairs{list-style:none;margin:0;padding:0;display:flex;gap:8px;align-items:flex-end}
+.l8 .stairs li{flex:1 1 0;min-width:0;height:calc(var(--s)*46px + 78px);background:#145F72;border-top:5px solid var(--ac);border-radius:8px 8px 0 0;padding:14px;display:flex;flex-direction:column;justify-content:space-between}
+.l8 .stairs b{font-size:clamp(17px,2.2vw,26px);font-weight:900;color:var(--ac)}
+.l8 .stairs span{font-size:14px}
+.l8 .help{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.l8 .help span{display:flex;align-items:baseline;gap:10px;border:1.5px solid #2C7A8C;border-radius:8px;padding:8px 14px;font-size:14px}
+.l8 .help b{font-weight:200;font-size:28px;color:var(--ac);font-variant-numeric:tabular-nums}
+
+/* ===== 9 합동: 메모 보드 ===== */
+.l9{--bg:#ECEDF1;--fg:#222;--ac:#FF6B6B;--on:#fff;--pn:#fff;--pnfg:#222;--ac2:#D94444;--ln:#D3D5DD;--mu:#555;--rad:4px;font-family:'Gaegu','Noto Sans KR',sans-serif;
+ background-image:radial-gradient(#C3C6D1 1.4px,transparent 1.5px);background-size:24px 24px}
+.l9 .grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hd hd" "mo mo" "pn dl";align-items:start}
+.l9 .no{display:inline-block;font-weight:700;font-size:clamp(60px,9vw,110px);line-height:1;color:var(--ac);transform:rotate(-6deg);margin-bottom:6px}
+.l9 h2{font-weight:700;font-size:clamp(40px,6.4vw,84px);letter-spacing:-.01em}
+.l9 .q{font-size:clamp(20px,2.4vw,28px)}
+.l9 .pn,.l9 .pn li,.l9 .pn p,.l9 .pn h3,.l9 .btn{font-family:'Noto Sans KR',sans-serif}
+.l9 .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:20px}
+.l9 .nt{padding:18px 18px 22px;font-size:clamp(20px,2.4vw,26px);line-height:1.25;box-shadow:0 8px 0 -4px rgba(0,0,0,.08);min-height:130px}
+.l9 .nt small{display:block;font-size:15px;font-weight:700;opacity:.65;margin-bottom:6px}
+.l9 .n1{background:#FFE66D;transform:rotate(-2deg)}.l9 .n2{background:#FFB3C1;transform:rotate(1.5deg)}.l9 .n3{background:#B8F0D0;transform:rotate(-1deg)}.l9 .n4{background:#BFE0FF;transform:rotate(2deg)}.l9 .n5{background:#FFD0A8;transform:rotate(-1.5deg)}
+
+/* ===== 10 합동: 전시 ===== */
+.l10{--bg:#101010;--fg:#F4F4F4;--ac:#F4F4F4;--on:#101010;--pn:#1A1A1A;--pnfg:#F4F4F4;--ln:#3A3A3A;--mu:#A8A8A8;--rad:0;--dot:#FF3B30;font-family:'Nanum Myeongjo','Noto Serif KR',serif}
+.l10 .grid{grid-template-columns:minmax(0,.7fr) minmax(0,1.3fr);grid-template-areas:"hd mo" "dl mo" "pn pn";align-items:start}
+.l10 .pn,.l10 .pn li,.l10 .pn p,.l10 .pn h3,.l10 .btn,.l10 .sub{font-family:'Noto Sans KR',sans-serif}
+.l10 .no{font-weight:400;font-size:clamp(80px,12vw,150px);line-height:.9;margin-bottom:10px;position:relative;display:inline-block}
+.l10 .no::after{content:"";position:absolute;right:-18px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--dot)}
+.l10 h2{font-weight:800;font-size:clamp(30px,4.4vw,54px);letter-spacing:-.03em}
+.l10 .wall{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:22px 16px;align-items:end}
+.l10 figure{margin:0}
+.l10 .fr{aspect-ratio:3/4;background:#222;border:9px solid #F4F4F4;display:grid;place-items:center}
+.l10 .fr span{font-weight:800;font-size:clamp(30px,4vw,48px);color:#555}
+.l10 figure:nth-child(2) .fr{aspect-ratio:4/5}.l10 figure:nth-child(4) .fr{aspect-ratio:1/1}
+.l10 figcaption{margin-top:10px;font-size:13px;line-height:1.4}
+.l10 figcaption b{display:block;font-weight:800;font-size:15px}
+.l10 figcaption small{color:#A8A8A8}
+
+@media (max-width:820px){
+  .hero .wrap{grid-template-columns:minmax(0,1fr)}
+  .lesson .grid{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"hd" "mo" "pn" "dl"!important}
+  .l8 .stairs{flex-direction:column;align-items:stretch}
+  .l8 .stairs li{height:auto;min-height:calc(var(--s)*14px + 60px)}
+  .l6 .ad{grid-template-columns:minmax(0,1fr)}
+  .l10 .wall{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.toast{transition:none}}
+/* ===== 학생용 체험 (xp) ===== */
+.xp{margin-top:clamp(30px,5vw,60px);padding-top:clamp(20px,3vw,32px);border-top:2px solid currentColor}
+.xp-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin:0 0 16px}
+.xp-h h3{margin:0;font-size:clamp(22px,3vw,34px);font-weight:900;letter-spacing:-.03em}
+.xp-h span{font-size:14px;opacity:.85}
+.xp-box{background:var(--pn);color:var(--pnfg);border-radius:var(--rad,12px);border:var(--pnb,0);padding:clamp(16px,2.6vw,28px);display:grid;gap:16px}
+.xp-box h4{margin:0;font-size:15px;font-weight:900;color:var(--ac2,var(--ac))}
+.xp-box p{margin:0;font-size:15px}
+.xp-row{display:flex;flex-wrap:wrap;gap:8px}
+.xb{border:2px solid var(--ac);background:transparent;color:inherit;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:14px;min-height:40px;line-height:1.3}
+.xb:hover{filter:brightness(1.1)}
+.xb[aria-pressed="true"],.xb.on{background:var(--ac);color:var(--on)}
+.xb.solid{background:var(--ac);color:var(--on)}
+.xb[disabled]{opacity:.45;cursor:default}
+.xc{border:1.5px solid var(--ln,currentColor);border-radius:calc(var(--rad,12px)*.7);padding:12px 14px;background:transparent}
+.xc.sel{border-color:var(--ac);box-shadow:inset 0 0 0 1.5px var(--ac)}
+.xc b{display:block}
+.xcard{border:2px solid currentColor;border-radius:calc(var(--rad,12px)*.8);padding:16px 18px;font-size:clamp(17px,2.2vw,22px);font-weight:700;line-height:1.45;min-height:84px;display:grid;align-items:center}
+.xbar{height:6px;background:var(--ln,#8884);border-radius:3px;overflow:hidden}
+.xbar i{display:block;height:100%;width:100%;background:var(--ac);transform-origin:left;animation:xt 3s linear forwards}
+@keyframes xt{to{transform:scaleX(0)}}
+.xfb{border-left:4px solid var(--ac);padding:6px 12px;font-size:14px;background:transparent}
+.xfb b{color:var(--ac2,var(--ac))}
+.xgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px}
+.xtbl{width:100%;border-collapse:collapse;font-size:14px}
+.xtbl th,.xtbl td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--ln,#8884);vertical-align:top}
+.xtbl th{font-size:12px;letter-spacing:.06em;opacity:.8}
+.xtw{overflow-x:auto}
+.xmk{background:var(--ac);color:var(--on);border-radius:3px;padding:0 4px}
+.xseg{cursor:pointer;border-bottom:2px dotted currentColor;padding:1px 2px}
+.xseg:hover,.xseg:focus-visible{background:var(--ln,#8883)}
+.xseg[data-t]{background:var(--ac);color:var(--on);border-bottom-color:transparent;border-radius:3px}
+.xin{width:100%;font:inherit;color:inherit;background:transparent;border:2px solid var(--ln,currentColor);border-radius:10px;padding:10px 12px;min-height:44px}
+textarea.xin{resize:vertical;min-height:84px}
+.xscore{font-size:clamp(20px,3vw,30px);font-weight:900;color:var(--ac2,var(--ac))}
+.xtag{display:inline-block;font-size:12px;font-weight:700;border:1.5px solid currentColor;border-radius:999px;padding:1px 8px;margin-right:6px}
+.xphone{border:2px solid currentColor;border-radius:18px;padding:12px;display:grid;gap:10px;max-width:420px}
+.xfeed{display:grid;gap:8px}
+.xfeed li{list-style:none;display:flex;gap:10px;align-items:center;border:1.5px solid var(--ln,currentColor);border-radius:10px;padding:8px 10px;font-size:14px}
+.xfeed{padding:0;margin:0}
+.xfeed li b{font-variant-numeric:tabular-nums;min-width:1.4em}
+.xfeed li em{font-style:normal;font-size:12px;opacity:.8;margin-left:auto}
+.xheart{font-size:24px;background:transparent;border:0;color:inherit;cursor:pointer;line-height:1;padding:2px 4px}
+canvas.xcv{max-width:100%;height:auto;border-radius:10px;border:1.5px solid var(--ln,currentColor)}
+/* 도감 */
+.cases{background:#F3EDE1;background:#EFE9DD;color:#1E1B16;padding-block:clamp(44px,7vw,96px);scroll-margin-top:60px}
+.cases .in{max-width:1160px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.cases h2{font-weight:900;font-size:clamp(34px,5.6vw,72px);letter-spacing:-.045em;line-height:1.08;margin:0 0 12px}
+.cases .lead{max-width:44em;margin:0 0 22px}
+.cases .flt{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.cases .flt button{border:2px solid #1E1B16;background:transparent;color:#1E1B16;border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px;cursor:pointer}
+.cases .flt button[aria-pressed="true"]{background:#1E1B16;color:#EFE9DD}
+.cases .cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:18px}
+.cases .cd{background:#fff;border:2.5px solid #1E1B16;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer;display:flex;flex-direction:column}
+.cases .cd .ad{background:#FFE14D;padding:18px;font-weight:900;font-size:19px;line-height:1.35;min-height:132px;display:grid;align-items:center}
+.cases .cd .ft{padding:10px 14px;font-size:13px;display:flex;justify-content:space-between;gap:8px;align-items:center;border-top:2.5px solid #1E1B16}
+.cases .cd .bk{padding:14px;font-size:14px;border-top:2.5px solid #1E1B16;display:none;background:#fff}
+.cases .cd[aria-expanded="true"] .bk{display:block}
+.cases .cd .bk b{display:block;margin-top:8px;font-size:12px;letter-spacing:.08em;color:#B2281E}
+.cases .cd .bk b:first-child{margin-top:0}
+.cases .note{margin-top:22px;font-size:14px;max-width:54em}
+@media (max-width:820px){.xgrid{grid-template-columns:minmax(0,1fr)}}
+.xstage{display:grid;gap:12px}
+.xnote{font-size:12px;opacity:.8;margin:10px 0 0}
+.xb[data-t],.xseg{touch-action:manipulation}
+label.xp-row{align-items:center;font-size:14px}
+.cases .cd{width:100%;align-self:start}.xseg{padding:2px 3px;line-height:2.1}.xcard{line-height:1.9}
+.cases .cg>div{display:flex}
+/* 가독성: 장식 글꼴을 학생 체험 영역에서 끄고 굵고 또렷한 고딕으로 */
+.xp,.xp *,.s-only .todo,.s-only .todo li{font-family:'Noto Sans KR',system-ui,-apple-system,'Malgun Gothic',sans-serif!important}
+.xp-box{font-size:17px;font-weight:500;line-height:1.65}
+.xp-box p,.xfb,.xc,.xtbl{font-weight:500;font-size:16px}
+.xcard{font-weight:700;font-size:clamp(18px,2.3vw,22px)}
+.xb{font-weight:700;font-size:15px;border-width:2px}
+.xfb{font-size:16px;padding:8px 14px;border-left-width:5px}
+.xfb b{font-weight:900}
+.xtag{font-size:14px;font-weight:700}
+.xnote{font-size:13px;opacity:.9}
+.xp-h span{font-size:15px;opacity:1}
+.xtbl th{font-size:13px}
+.xtbl td{font-size:15px}
+.s-only .todo li{font-weight:500}
+/* 가독성: 장식 글꼴을 학생 체험 영역에서 끄고 굵고 또렷한 고딕으로 */
+.xp,.xp *,.s-only .todo,.s-only .todo li{font-family:'Noto Sans KR',system-ui,-apple-system,'Malgun Gothic',sans-serif!important}
+.xp-box{font-size:17px;font-weight:500;line-height:1.65}
+.xp-box p,.xfb,.xc,.xtbl{font-weight:500;font-size:16px}
+.xcard{font-weight:700;font-size:clamp(18px,2.3vw,22px)}
+.xb{font-weight:700;font-size:15px}
+.xfb{font-size:16px;padding:8px 14px;border-left-width:5px}
+.xfb b{font-weight:900}
+.xtag{font-size:14px;font-weight:700}
+.xnote{font-size:13px;opacity:.9}
+.xp-h span{font-size:15px;opacity:1}
+.xtbl th{font-size:13px}.xtbl td{font-size:15px}
+.s-only .todo li{font-weight:500}
+details.xmore{border:2px dashed var(--ln,currentColor);border-radius:calc(var(--rad,12px)*.7);padding:10px 14px;display:grid;gap:12px}
+details.xmore>summary{cursor:pointer;font-weight:800;font-size:16px}
+label.xlab{display:grid;gap:4px;font-size:14px;font-weight:700}
+/* 출처 가이드 */
+.srcg{--ac:#1B3CB8;--on:#fff;--ln:#C5CEEC;--pn:#fff;--pnfg:#14213D;--rad:10px;background:#F7F8FC;color:#14213D;padding-block:clamp(44px,7vw,96px);scroll-margin-top:60px}
+.srcg .in{max-width:1160px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:26px}
+.srcg h2{font-weight:900;font-size:clamp(32px,5.2vw,64px);letter-spacing:-.045em;line-height:1.1;margin:0}
+.srcg h3{font-size:22px;font-weight:900;margin:0 0 10px;letter-spacing:-.02em}
+.srcg .lead{margin:0;max-width:46em;font-size:17px}
+.srcg ol.st{list-style:none;counter-reset:s;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px}
+.srcg ol.st li{counter-increment:s;background:#fff;border:2px solid #14213D;padding:14px;font-size:15px;display:grid;gap:6px;align-content:start}
+.srcg ol.st li::before{content:counter(s);font-weight:900;font-size:30px;color:#1B3CB8;line-height:1}
+.srcg ol.st b{font-size:16px}
+.srcg .tw{overflow-x:auto}
+.srcg table{width:100%;border-collapse:collapse;background:#fff;font-size:15px;min-width:560px}
+.srcg th,.srcg td{border:1.5px solid #14213D;padding:9px 11px;text-align:left;vertical-align:top}
+.srcg th{background:#14213D;color:#fff;font-weight:700}
+.srcg code{font-family:inherit;background:#E8ECFA;padding:1px 5px;border-radius:3px;font-weight:600;word-break:break-all}
+.srcg .box{border-left:6px solid #1B3CB8;background:#fff;padding:12px 16px;font-size:15px}
+.srcg ul{margin:6px 0 0;padding-left:1.2em}
+.srcg *{font-family:'Noto Sans KR',system-ui,sans-serif}
+@media(min-width:1000px){.srcg ol.st{grid-template-columns:repeat(5,minmax(0,1fr))}}
+a.btn,a.kbtn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+</style>
+
+<div class="topbar"><div class="wrap">
+  <span class="brand">오색렌즈 · 유해정보 리터러시</span>
+  <div class="seg" role="group" aria-label="보기 전환"><button type="button" id="m-teacher" aria-pressed="true">교사용</button><button type="button" id="m-student" aria-pressed="false">학생용</button></div>
+  <nav class="jump" aria-label="차시 바로가기"><a href="#l1">1</a><a href="#l2">2</a><a href="#l3">3</a><a href="#l4">4</a><a href="#l5">5</a><a href="#l6">6</a><a href="#l7">7</a><a href="#l8">8</a><a href="#l9">9</a><a href="#l10">10</a><a href="#source">출처</a><a class="s-only" href="#cases">도감</a></nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div>
+    <h1>정보를 믿기 전에,<br>열 번 멈춰 보는 수업</h1>
+    <p class="t-only">중1~3 대상 10차시 수업 꾸러미입니다. 차시마다 지도안, 학생 활동지, 수업 슬라이드를 받을 수 있습니다. 보건·사서·기술·가정·사회 선생님이 함께 만들었습니다.</p>
+    <p class="s-only">열 번의 수업에서 정보를 어떻게 믿고, 어떻게 확인하고, 문제가 생기면 어떻게 도움받는지 배워요. 차시마다 활동지를 받을 수 있어요.</p>
+    <div class="all t-only">
+      <a class="kbtn" href="files/all/%EC%9C%A0%ED%95%B4%EC%A0%95%EB%B3%B4%EB%A6%AC%ED%84%B0%EB%9F%AC%EC%8B%9C_%EC%A7%80%EB%8F%84%EC%95%88_%EC%A0%84%EC%B2%B4.zip" download="유해정보리터러시_지도안_전체.zip">지도안 전체 <small>zip</small></a>
+      <a class="kbtn" href="files/all/%EC%9C%A0%ED%95%B4%EC%A0%95%EB%B3%B4%EB%A6%AC%ED%84%B0%EB%9F%AC%EC%8B%9C_%ED%99%9C%EB%8F%99%EC%A7%80_%EC%A0%84%EC%B2%B4.zip" download="유해정보리터러시_활동지_전체.zip">활동지 전체 <small>zip</small></a>
+      <a class="kbtn" href="files/all/%EC%9C%A0%ED%95%B4%EC%A0%95%EB%B3%B4%EB%A6%AC%ED%84%B0%EB%9F%AC%EC%8B%9C_%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C_%EC%A0%84%EC%B2%B4.zip" download="유해정보리터러시_슬라이드_전체.zip">슬라이드 전체 <small>zip</small></a>
+    </div>
+    <div class="all s-only"><a class="kbtn" href="files/all/%EC%9C%A0%ED%95%B4%EC%A0%95%EB%B3%B4%EB%A6%AC%ED%84%B0%EB%9F%AC%EC%8B%9C_%ED%99%9C%EB%8F%99%EC%A7%80_%EC%A0%84%EC%B2%B4.zip" download="유해정보리터러시_활동지_전체.zip">활동지 전체 받기 <small>zip</small></a></div>
+  </div>
+  <ol class="five" aria-label="정보 5문">
+    <li><b>① 출처</b><span>누가 만들었나?</span></li>
+    <li><b>② 근거</b><span>근거가 있나?</span></li>
+    <li><b>③ 의도</b><span>무엇을 원하나?</span></li>
+    <li><b>④ 표현</b><span>어떻게 말하고 있나?</span></li>
+    <li><b>⑤ 재확인</b><span>다른 곳에서도 확인되나?</span></li>
+  </ol>
+</div></header>
+
+<main>
+<section class="lesson l1" id="l1" aria-labelledby="h1"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">1</div><p class="sub">1/10 · 보건</p><h2 id="h1">우리 반 정보 체크리스트 만들기</h2><p class="q">건강정보와 유해정보를 어떻게 구분할까?</p></header>
+<div class="mo"><div class="form"><div class="form-t">정보 판정 용지</div>
+<label><i></i><b>출처</b><span>누가 만들었나?</span></label>
+<label><i></i><b>근거</b><span>근거가 있나?</span></label>
+<label><i></i><b>의도</b><span>무엇을 원하나?</span></label>
+<label><i></i><b>표현</b><span>어떻게 말하고 있나?</span></label>
+<label><i></i><b>재확인</b><span>다른 곳에서도 확인되나?</span></label>
+<div class="verdict"><span>신뢰 가능</span><span>추가 확인 필요</span><span class="hl">위험·행동 보류</span></div></div></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>건강정보의 범위와 건강행동에 미치는 영향을 설명하고, 근거 없이 몸·마음·돈·관계에 해를 줄 수 있는 정보(유해정보)의 특징을 말할 수 있다.</li><li>출처·근거·의도·표현·재확인의 다섯 가지 기준을 정보에 적용하여 ‘신뢰 가능 / 추가 확인 필요 / 위험·행동 보류’로 판단하고 그 근거를 설명할 수 있다.</li><li>친구들과 판단 기준을 정하여 ‘우리 반 정보 체크리스트(5문)’를 만들고, 2~10차시의 공통 판단 도구로 활용하려는 태도를 가진다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 7분, 전개 31분, 정리 7분"><i style="flex:7"><b>도입</b>7분</i><i style="flex:31"><b>전개</b>31분</i><i style="flex:7"><b>정리</b>7분</i></div>
+<ul class="fl"><li><b>도입</b>일상에서 접하는 정보를 3초 안에 직관적으로 판정해 보며 ‘믿어도 될까?’라는 문제를 인식한다.</li><li><b>전개</b>정보의 범위를 넓혀 이해하고, 사례를 비교·분석하여 학생 스스로 판단 기준을 찾아 5문 체크리스트를 완성한다.</li><li><b>정리</b>새로운 정보에 체크리스트를 개별 적용해 보고, 2~10차시의 공통 판단 도구로 활용함을 확인한다.</li></ul>
+<h3>평가</h3><p>상·중·하 평가계획 4영역</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>사례는 모두 수업용 가상 사례입니다.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>평소 보는 정보를 3초 안에 판단해 봐요.</li><li>건강정보와 유해정보가 어떻게 다른지 찾아요.</li><li>친구들과 함께 우리 반 정보 체크리스트(5문)를 만들어요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/01/1%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="1차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/01/1%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="1차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/01/1%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="1차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/01/1%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="1차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/01/1%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="1차시_학생활동지.docx">1차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp1"></div>
+</div></section>
+<section class="lesson l2" id="l2" aria-labelledby="h2"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">2</div><p class="sub">2/10 · 정보활용교육 (사서교사)</p><h2 id="h2">출처 따라가기와 AI 도구의 한계</h2><p class="q">출처를 따라가 확인하고, AI 답변은 어디까지 믿을 수 있을까?</p></header>
+<div class="mo"><div class="cat"><div class="cat-top"><span>청구기호 출처-3</span><em>직접 열어 봄</em></div>
+<ol><li><b>만든 사람·날짜 찾기</b><span>누가, 언제 쓴 글인가</span></li><li><b>원래 자료 열어 보기</b><span>적힌 곳에 정말 그 내용이 있나</span></li><li><b>다른 자료와 견주기</b><span>다른 곳과 같은 이야기인가</span></li></ol>
+<div class="cat-foot">AI 답변의 출처도 같은 순서로 확인해요</div></div></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>정보에 적힌 출처를 ‘만든 사람·날짜 찾기 → 원래 자료 열어 보기 → 다른 자료와 견주기’의 3단계로 따라가며 확인할 수 있다.</li><li>생성형 AI 답변이 그럴듯해도 없는 출처를 적거나 내용을 다르게 옮길 수 있음을 사례로 설명하고, AI 답변을 확인하는 방법을 적용할 수 있다.</li><li>1차시에 만든 ‘우리 반 정보 체크리스트’의 출처·근거·재확인 문항을 출처 따라가기 기준으로 보완하려는 태도를 가진다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 7분, 전개 31분, 정리 7분"><i style="flex:7"><b>도입</b>7분</i><i style="flex:31"><b>전개</b>31분</i><i style="flex:7"><b>정리</b>7분</i></div>
+<ul class="fl"><li><b>도입</b>1차시 체크리스트를 떠올리고, 같은 내용에 붙은 서로 다른 출처 표시를 비교하며 ‘출처가 있으면 믿어도 될까?’라는 문제를 인식한다.</li><li><b>전개</b>출처 따라가기 3단계를 익히고 모둠별 출처 추적 미션을 수행한 뒤, AI 답변의 출처를 확인하며 AI 도구의 한계와 활용 방법을 파악한다.</li><li><b>정리</b>새로운 AI 답변 사례를 개별적으로 판단하고, 앞으로 정보와 AI 답변을 볼 때 가장 먼저 확인할 점을 정리하며 다음 차시와 연계한다.</li></ul>
+<h3>평가</h3><p>세특 관찰 기록 4영역(사서 협력)</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>생성형 AI 답변 사례는 수업용으로 만든 가상 사례입니다.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>출처에 적힌 사람과 자료를 직접 따라가 봐요.</li><li>AI가 그럴듯하게 틀리는 사례를 확인해요.</li><li>출처가 있어도 열어 보고 견주는 습관을 정리해요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/02/2%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="2차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/02/2%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="2차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/02/2%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="2차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/02/2%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="2차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/02/2%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="2차시_학생활동지.docx">2차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp2"></div>
+</div></section>
+<section class="lesson l3" id="l3" aria-labelledby="h3"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">3</div><p class="sub">3/10 · 기술·가정(기술) + 정보활용교육(사서) 협력수업</p><h2 id="h3">왜 이 정보가 내게 떴을까?</h2><p class="q">떴다는 것은 믿을 만하다는 뜻일까?</p></header>
+<div class="mo"><div class="rules"><span>끝까지 +2</span><span>좋아요 +2</span><span>공유 +3</span><span>잠깐 +1</span><span class="neg">건너뜀 −1</span></div>
+<div class="bars" role="img" aria-label="예시 계산: 끝까지 보고 좋아요 4점, 공유 3점, 잠깐 1점, 건너뜀 마이너스 1점">
+<div class="bar" style="--w:100%"><b>1</b><span>끝까지 + 좋아요</span><em>4</em></div>
+<div class="bar" style="--w:75%"><b>2</b><span>공유</span><em>3</em></div>
+<div class="bar" style="--w:25%"><b>3</b><span>잠깐 봄</span><em>1</em></div>
+<div class="bar neg" style="--w:12%"><b>4</b><span>건너뜀</span><em>−1</em></div></div>
+<p class="cap">예시 계산이에요. 점수가 높은 순서로 내 화면이 정해져요.</p></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>추천 알고리즘이 이용자의 행동 기록(시청·좋아요·공유·건너뜀)을 바탕으로 콘텐츠를 골라 보여 주는 원리를 점수 규칙으로 설명할 수 있다.</li><li>같은 앱을 써도 사람마다 화면이 달라지는 까닭과, 정보가 ‘많이 떴다’는 사실이 그 정보의 정확성·안전성을 보장하지 않음을 사례로 설명할 수 있다.</li><li>우리 반 정보 체크리스트의 ③ 의도, ④ 표현, ⑤ 재확인 문항을 알고리즘 관점에서 보완하고, 내 화면을 스스로 점검·조정하려는 태도를 가진다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 7분, 전개 31분, 정리 7분"><i style="flex:7"><b>도입</b>7분</i><i style="flex:31"><b>전개</b>31분</i><i style="flex:7"><b>정리</b>7분</i></div>
+<ul class="fl"><li><b>도입</b>같은 앱을 열었는데 친구와 내 화면이 다른 경험을 나누며 ‘왜 이 정보가 내게 떴을까?’라는 문제를 인식한다.</li><li><b>전개</b>추천이 만들어지는 4단계를 이해하고, 모둠별 행동 기록 카드로 추천 피드를 직접 계산·비교한 뒤 ‘떴다 ≠ 믿을 만하다’를 확인하여 체크리스트를 보완한다.</li><li><b>정리</b>새로운 사례(‘사’)를 개별적으로 판단하고, 내 화면을 점검·조정하는 방법을 정리하며 다음 차시와 연계한다.</li></ul>
+<h3>평가</h3><p>세특 관찰 기록 4영역(사서 협력)</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>마무리 슬라이드와 지도안 정리의 ‘다음 차시 예고’가 실제 4차시(미디어 수사대 ①)와 다르게 적혀 있습니다. 수업 전에 고쳐 쓰세요.</li><li>점수 규칙(끝까지 +2, 좋아요 +2, 공유 +3, 잠깐 +1, 건너뜀 −1)은 수업용 규칙입니다.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>같은 앱인데 친구와 내 화면이 왜 다른지 알아봐요.</li><li>행동 기록이 점수가 되어 화면 순서를 바꾸는 과정을 직접 계산해요.</li><li>‘떴다’와 ‘믿을 만하다’는 다르다는 걸 확인해요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/03/3%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="3차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/03/3%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="3차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/03/3%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="3차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/03/3%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="3차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/03/3%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="3차시_학생활동지.docx">3차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp3"></div>
+</div></section>
+<section class="lesson l4" id="l4" aria-labelledby="h4"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">4</div><p class="sub">4/10 · 기술·가정(기술 영역)</p><h2 id="h4">미디어 수사대 ①</h2><p class="q">좋아요가 바꾸는 추천 화면, 광고의 숨은 조건 찾기</p></header>
+<div class="mo"><div class="tape"><span>CASE FILE · 미디어 수사대</span></div><div class="board">
+<div class="vc"><span class="tg">운동</span><div class="th"></div><div class="hr"><s class="h1"></s><s class="h1"></s><s class="h0"></s></div></div><div class="vc"><span class="tg">게임</span><div class="th"></div><div class="hr"><s class="h1"></s><s class="h0"></s><s class="h0"></s></div></div><div class="vc"><span class="tg">생활</span><div class="th"></div><div class="hr"><s class="h0"></s><s class="h0"></s><s class="h0"></s></div></div><div class="vc"><span class="tg">운동</span><div class="th"></div><div class="hr"><s class="h1"></s><s class="h0"></s><s class="h0"></s></div></div><div class="vc"><span class="tg">게임</span><div class="th"></div><div class="hr"><s class="h1"></s><s class="h1"></s><s class="h0"></s></div></div><div class="vc"><span class="tg">생활</span><div class="th"></div><div class="hr"><s class="h0"></s><s class="h0"></s><s class="h0"></s></div></div></div>
+<div class="cases"><span>사건 ① 룰렛</span><span>사건 ② 다이어트 후기</span><span>사건 ③ 집중력 무료 체험</span></div></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>① 좋아요 3개의 주제별 개수와 추천 순서의 관계를 설명하고, 추천과 신뢰성을 구분한다.</li><li>② 정보 5문으로 가상 광고의 목적·표현·숨은 조건을 분석하고 단서를 근거로 판단한다.</li><li>③ 광고에 대한 판단에 맞는 확인 방법을 제시하고, 즉시 반응하지 않고 확인하려는 태도를 가진다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 6분, 전개 32분, 정리 7분"><i style="flex:6"><b>도입</b>6분</i><i style="flex:32"><b>전개</b>32분</i><i style="flex:7"><b>정리</b>7분</i></div>
+<ul class="fl"><li><b>도입</b>3차시의 추천 원리와 정보 5문을 떠올리고, “내가 보는 정보는 왜 보이며 무엇을 근거로 믿어야 할까?”라는 문제를 인식한다.</li><li><b>전개</b>웹앱에서 좋아요 선택에 따라 추천 화면이 바뀌는 것을 직접 실험하고, 가상 광고 사건을 수사하며 숨은 조건과 누락정보를 단서로 찾아 5문으로 판단한다.</li><li><b>정리</b>가장 결정적인 단서와 확인 방법을 제출하고, “추천은 관심 기록, 신뢰성은 출처와 근거로 확인한다”를 정리하며 5차시와 연계한다.</li></ul>
+<h3>평가</h3><p>상·중·하 평가계획 4영역</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>기술 선생님이 만든 웹앱 ‘미디어 수사대’가 필요하며 이 페이지에는 포함되어 있지 않습니다. 활동지는 종이 대체본입니다.</li><li>사건 카드 문구는 새로 쓴 것이라 앱 화면과 다를 수 있습니다.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>좋아요 3개를 눌러 추천 화면이 바뀌는 걸 실험해요.</li><li>가상 광고 사건을 수사해 숨은 조건을 찾아요.</li><li>추천은 관심 기록, 믿을 만한지는 출처와 근거로 확인해요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/04/4%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="4차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/04/4%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="4차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/04/4%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="4차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/04/4%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="4차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/04/4%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="4차시_학생활동지.docx">4차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp4"></div>
+</div></section>
+<section class="lesson l5" id="l5" aria-labelledby="h5"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">5</div><p class="sub">5/10 · 기술·가정(기술 영역)</p><h2 id="h5">미디어 수사대 ②</h2><p class="q">판단을 돕는 안전 화면 설계와 개별 판단</p></header>
+<div class="mo"><div class="phone"><div class="scr"><div class="ph-t">안전 화면 설계</div>
+<div class="fn"><i></i>왜 나에게 보였을까</div><div class="fn"><i></i>이건 광고예요</div><div class="fn"><i></i>누가 만든 정보일까</div><div class="fn"><i></i>다른 정보도 볼래요</div><div class="fn"><i></i>도움이 필요해요</div></div></div>
+<p class="cap">기능 5가지 중 2개 이상을 골라 이유를 정보 5문과 연결해요.</p></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>① 판단을 돕는 기능 2개 이상을 선택하고, 각 기능이 판단을 돕는 이유를 정보 5문과 연결하여 설명한다.</li><li>② 짝 점검을 반영해 기능이나 설명을 수정하고 수정 이유를 말한다.</li><li>③ 새로운 메시지를 단서를 근거로 판단하고, 위험 상황에서 안전한 대응(행동 보류·확인·도움 요청)을 제시한다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 6분, 전개 29분, 정리 10분"><i style="flex:6"><b>도입</b>6분</i><i style="flex:29"><b>전개</b>29분</i><i style="flex:10"><b>정리</b>10분</i></div>
+<ul class="fl"><li><b>도입</b>4차시에서 찾은 광고의 숨은 조건과 정보 5문을 떠올리고, “만약 내가 앱을 만든다면 이용자의 판단을 어떻게 도울까?”라는 문제를 인식한다.</li><li><b>전개</b>판단을 돕는 기능 5가지 중 2개 이상을 골라 이유와 함께 설계하고, 짝 점검을 반영해 개선한다. 설계 결과를 공유하며 플랫폼의 책임과 이용자의 선택권을 연결한다.</li><li><b>정리</b>새로운 메시지를 혼자 판단하고 안전한 행동을 선택하여 제출하며, 후속 사례 분석·캠페인 수업으로 판단 기준을 연결한다.</li></ul>
+<h3>평가</h3><p>상·중·하 평가계획 4영역</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>웹앱 활동 3·4와 짝을 이룹니다. 활동 4는 4차시 사건 ③과 주제가 겹칩니다.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>내가 앱을 만든다면 판단을 돕는 기능을 어떻게 넣을지 설계해요.</li><li>기능 5가지 중 2개 이상 골라 이유를 써요.</li><li>새로운 메시지를 혼자 판단하고 안전한 행동을 골라요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/05/5%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="5차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/05/5%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="5차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/05/5%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="5차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/05/5%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="5차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/05/5%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="5차시_학생활동지.docx">5차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp5"></div>
+</div></section>
+<section class="lesson l6" id="l6" aria-labelledby="h6"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">6</div><p class="sub">6/10 · 기술·가정(가정 영역) + 보건 협력수업</p><h2 id="h6">광고의 과장 표현 읽기</h2><p class="q">“일주일 만에 확 빠져요”는 무엇을 말하지 않을까?</p></header>
+<div class="mo"><div class="ad"><div class="burst"><span>일주일 만에</span><strong>확!</strong></div>
+<div class="tr"><s>일주일 만에 확 빠져요!</s><b>→ 몇 명에게, 어떤 조건에서 나온 결과인가요?</b></div></div>
+<div class="types"><span>단정</span><span>속도</span><span>전후·체험담</span><span>권위</span><span>재촉</span></div></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>① 광고의 단정·속도·전후 비교와 체험담·권위 빌리기·재촉 표현을 찾아 근거와 조건이 빠진 부분을 정확한 말로 바꾸어(번역하여) 설명한다.</li><li>② 몸과 외모에 대한 광고 메시지가 건강 선택과 마음에 미치는 영향을 말하고, 건강한 몸 관리 정보의 특징을 설명한다.</li><li>③ 정보 5문(② 근거, ④ 표현)을 광고에 적용해 판단하고, 먹는 제품은 구매 전에 보호자·약사·의사·보건 교사와 상의하는 등 안전한 확인 방법을 제시한다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 6분, 전개 29분, 정리 10분"><i style="flex:6"><b>도입</b>6분</i><i style="flex:29"><b>전개</b>29분</i><i style="flex:10"><b>정리</b>10분</i></div>
+<ul class="fl"><li><b>도입</b>눈길을 끄는 문구와 믿을 만한 문구를 3초 안에 비교해 보며 “끌리는 것과 믿을 만한 것은 같을까?”라는 문제를 인식한다.</li><li><b>전개</b>과장 표현의 유형을 이해하고 모둠별 가상 광고의 표현을 정확한 말로 번역한다. 광고가 몸과 외모에 대해 전하는 메시지를 건강한 정보와 비교하고 정보 5문을 보완한다.</li><li><b>정리</b>새로운 광고를 혼자 판단하고 안전한 확인 방법을 정리하며 7차시(후기·체험담·협찬)와 연계한다.</li></ul>
+<h3>평가</h3><p>상·중·하 평가계획 4영역</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>학생 본인이나 친구의 체형·체중을 언급하거나 비교하지 않도록 사전에 안내합니다. 수치와 식단은 다루지 않습니다.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>끌리는 문구와 믿을 만한 문구를 비교해요.</li><li>과장 표현 5가지 유형을 찾아 정확한 말로 번역해요.</li><li>먹는 제품은 사기 전에 어른과 먼저 상의해요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/06/6%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="6차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/06/6%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="6차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/06/6%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="6차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/06/6%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="6차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/06/6%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="6차시_학생활동지.docx">6차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp6"></div>
+</div></section>
+<section class="lesson l7" id="l7" aria-labelledby="h7"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">7</div><p class="sub">7/10 · 기술·가정(가정 영역) + 정보활용교육(사서) 협력수업</p><h2 id="h7">후기·체험담·협찬 읽기</h2><p class="q">“써 봤더니 좋아요” 뒤에는 누가 있을까?</p></header>
+<div class="mo"><div class="bub a"><div class="st">★★★★★</div><p>대박!! 완전 강추! 단점 하나도 없어요!</p><small>사용 기간 없음 · 단점 없음</small></div>
+<div class="bub b"><div class="st">★★★★☆</div><p>3주 써 본 후기예요. 첫 주는 잘 모르겠고 3주 차부터 조금 나아진 느낌이에요. 향이 강한 건 아쉬워요.</p><small>맨 끝에 작게: #제품 제공</small></div>
+<div class="chips"><span>직접 써 본 후기</span><span>협찬 후기</span><span>광고를 후기처럼 쓴 글</span></div></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>① 후기·체험담을 쓴 사람과 대가(협찬·제공·할인 코드 등) 여부를 단서로 확인하여 직접 써 본 후기, 협찬 후기, 광고성 후기를 구분한다.</li><li>② 후기 속 빠진 정보(사용 기간·단점·비교)와 반복되는 문구를 찾고, 후기만으로 판단하지 않는 이유를 설명한다.</li><li>③ 출처 따라가기 3단계를 후기에 적용하고, 정보 5문(① 출처, ③ 의도, ⑤ 재확인)을 후기·협찬 관점으로 보완하는 태도를 가진다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 6분, 전개 29분, 정리 10분"><i style="flex:6"><b>도입</b>6분</i><i style="flex:29"><b>전개</b>29분</i><i style="flex:10"><b>정리</b>10분</i></div>
+<ul class="fl"><li><b>도입</b>후기 두 개를 3초씩 비교하며 “좋다는 후기는 믿어도 될까? 누가, 왜 썼을까?”라는 문제를 인식한다.</li><li><b>전개</b>후기의 세 종류를 이해하고 모둠별 가상 후기 카드에서 단서를 찾아 판정한다. 출처 따라가기 3단계를 후기에 적용하고 정보 5문을 후기·협찬 관점으로 보완한다.</li><li><b>정리</b>새로운 후기를 혼자 판단하고 확인 방법을 정리하며 8차시(피해·위험 상황 대응)와 연계한다.</li></ul>
+<h3>평가</h3><p>세특 관찰 기록 4영역(사서 협력)</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>광고 표시와 관련한 법·지침의 세부 내용은 단정하지 않았습니다. 필요하면 공식 자료로 확인해 안내하세요.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>좋다는 후기를 쓴 사람과 대가를 찾아봐요.</li><li>직접 후기, 협찬 후기, 광고성 후기를 구분해요.</li><li>후기 말고 공식 안내까지 따라가서 확인해요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/07/7%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="7차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/07/7%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="7차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/07/7%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="7차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/07/7%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="7차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/07/7%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="7차시_학생활동지.docx">7차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp7"></div>
+</div></section>
+<section class="lesson l8" id="l8" aria-labelledby="h8"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">8</div><p class="sub">8/10 · 사회 + 보건 협력수업</p><h2 id="h8">피해·위험 상황 대응</h2><p class="q">정보를 믿고 문제가 생겼을 때, 혹은 친구가 위험해 보일 때 우리는 무엇을 할까?</p></header>
+<div class="mo"><ol class="stairs"><li style="--s:1"><b>멈추기</b><span>더 보내거나 연락하지 않아요</span></li><li style="--s:2"><b>남기기</b><span>화면과 대화를 지우지 않아요</span></li><li style="--s:3"><b>알리기</b><span>믿을 만한 어른에게 말해요</span></li><li style="--s:4"><b>도움받기</b><span>상황에 맞는 창구에 연결해요</span></li></ol>
+<div class="help"><span><b>112</b>위험이 급할 때</span><span><b>119</b>응급 상황</span><span><b>1388</b>청소년 상담</span><span><b>1336</b>도박 문제 상담</span><span><b>1342</b>마약류 문제 상담</span></div>
+<p class="cap">번호는 바뀔 수 있어요. 이용 전에 각 기관의 안내에서 한 번 더 확인해요.</p></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>① 유해정보로 생길 수 있는 피해·위험(돈, 몸과 건강, 개인정보, 관계)의 유형을 구분하고, 부끄러움이나 두려움 때문에 혼자 해결하려는 마음이 문제를 키울 수 있음을 설명한다.</li><li>② 피해·위험 상황에서 ‘멈추기–남기기–알리기–도움받기’ 대응 순서를 사례에 적용하여 자신의 판단과 행동을 제시한다.</li><li>③ 상황에 맞는 도움 창구(보호자·학교 선생님·상담·신고·응급)의 역할을 알고, 도움 요청 문장과 친구에게 해 줄 말을 만들어 공동체의 대응 약속으로 정리한다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 6분, 전개 29분, 정리 10분"><i style="flex:6"><b>도입</b>6분</i><i style="flex:29"><b>전개</b>29분</i><i style="flex:10"><b>정리</b>10분</i></div>
+<ul class="fl"><li><b>도입</b>가상 상황에서 “나라면 어떻게 할까?”를 바로 표시해 보며, 문제가 생겼을 때 사람들이 보이기 쉬운 반응(모른 척, 혼자 해결, 함께 비밀로, 어른에게 말하기)을 돌아본다.</li><li><b>전개</b>피해·위험의 유형과 ‘멈추기–남기기–알리기–도움받기’ 4단계를 알고, 모둠별 가상 사례에 적용한다. 상황별 도움 창구를 정리하고 도움 요청 문장과 친구에게 해 줄 말을 만든다.</li><li><b>정리</b>새로운 사례를 혼자 판단하고 말할 어른과 첫 문장을 쓴다. 우리 반 도움 약속을 정리하고 9~10차시 캠페인 제작과 연계한다.</li></ul>
+<h3>평가</h3><p>상·중·하 평가계획 4영역</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>도움 창구 번호(112, 119, 1388, 1336, 1342)는 배포 전에 각 기관 누리집에서 최신 번호와 운영 시간을 확인하세요.</li><li>학생이 실제 피해를 말하면 수업을 이어 가되 쉬는 시간에 개별 면담으로 연결하고, 학교 절차에 따라 처리합니다.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>문제가 생겼을 때 먼저 할 일 4단계를 배워요.</li><li>돈, 몸, 개인정보, 관계 사례로 연습해요.</li><li>도움 창구와 도움 요청 문장을 정리해요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/08/8%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="8차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/08/8%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="8차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/08/8%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="8차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/08/8%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="8차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/08/8%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="8차시_학생활동지.docx">8차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp8"></div>
+</div></section>
+<section class="lesson l9" id="l9" aria-labelledby="h9"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">9</div><p class="sub">9/10 · 사서·보건·사회·기술·가정 5교과 합동수업</p><h2 id="h9">캠페인 ① 기획</h2><p class="q">우리가 배운 것을 누구에게, 어떤 메시지로 전할까?</p></header>
+<div class="mo"><div class="notes"><div class="nt n1"><small>대상</small>누구에게?</div><div class="nt n2"><small>핵심 메시지</small>한 문장으로</div><div class="nt n3"><small>매체</small>포스터 · 카드뉴스 · 영상 스토리보드</div>
+<div class="nt n4"><small>렌즈</small>탐색 · 진단 · 공론 · 구조 · 생활</div><div class="nt n5"><small>점검</small>정확 · 존중 · 겁주지 않기 · 행동 · 출처</div></div></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>① 1~8차시에서 배운 판단 도구(정보 5문, 출처 따라가기, 대응 4단계 등)를 바탕으로 캠페인의 대상, 핵심 메시지 한 문장, 전달 매체를 정한다.</li><li>② 메시지의 정확성(과장·단정 없음), 대상에 대한 존중, 출처·저작권·초상권 표기를 점검 기준으로 삼아 모둠의 기획안을 점검하고 고친다.</li><li>③ 모둠 안에서 역할을 나누어 시안을 만들고, 10차시 제작·공유 계획을 세운다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 6분, 전개 29분, 정리 10분"><i style="flex:6"><b>도입</b>6분</i><i style="flex:29"><b>전개</b>29분</i><i style="flex:10"><b>정리</b>10분</i></div>
+<ul class="fl"><li><b>도입</b>1~8차시에서 만든 판단 도구와 우리 반 약속을 한 장으로 돌아보며, “이것을 아직 모르는 사람에게 전한다면?”이라는 문제를 인식한다.</li><li><b>전개</b>캠페인의 세 요소(대상·핵심 메시지·매체)를 알고, 모둠별로 렌즈(탐색·진단·공론·구조·생활)를 골라 기획서를 쓴다. 모둠 간 점검(갤러리 워크)으로 메시지를 고치고 시안을 스케치하며 10차시 계획을 세운다.</li><li><b>정리</b>모둠별로 기획 내용을 1분씩 발표하고 피드백을 한 줄로 받으며, 오늘의 한 줄을 쓴다. 10차시 제작·공유와 연계한다.</li></ul>
+<h3>평가</h3><p>상·중·하 평가계획 4영역</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>교내 게시·방송은 학교 절차에 맞게 허락받을 수 있는 범위에서 계획합니다.</li><li>사람 얼굴 사진은 쓰지 않고, 이미지·글꼴·음악은 출처를 밝히게 합니다.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>배운 것을 누구에게 전할지 정해요.</li><li>대상, 핵심 메시지, 매체를 모둠 기획서에 써요.</li><li>다른 모둠과 서로 점검하고 시안을 그려요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/09/9%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="9차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/09/9%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="9차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/09/9%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="9차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/09/9%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="9차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/09/9%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="9차시_학생활동지.docx">9차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp9"></div>
+</div></section>
+<section class="lesson l10" id="l10" aria-labelledby="h10"><div class="in"><div class="grid">
+<header class="hd"><div class="no" aria-hidden="true">10</div><p class="sub">10/10 · 사서·보건·사회·기술·가정 5교과 합동수업</p><h2 id="h10">캠페인 ② 제작·공유</h2><p class="q">우리의 메시지를 완성해 나누고, 우리는 무엇이 달라졌을까?</p></header>
+<div class="mo"><div class="wall"><figure><div class="fr"><span>탐색</span></div><figcaption><b>탐색 렌즈</b><small>모둠 캠페인 · 출처 표기</small></figcaption></figure><figure><div class="fr"><span>진단</span></div><figcaption><b>진단 렌즈</b><small>모둠 캠페인 · 출처 표기</small></figcaption></figure><figure><div class="fr"><span>공론</span></div><figcaption><b>공론 렌즈</b><small>모둠 캠페인 · 출처 표기</small></figcaption></figure><figure><div class="fr"><span>구조</span></div><figcaption><b>구조 렌즈</b><small>모둠 캠페인 · 출처 표기</small></figcaption></figure><figure><div class="fr"><span>생활</span></div><figcaption><b>생활 렌즈</b><small>모둠 캠페인 · 출처 표기</small></figcaption></figure></div><p class="cap">완성한 산출물은 출처와 함께 전시해요. 교내 게시는 허락받은 범위에서 해요.</p></div>
+<div class="pn">
+<div class="tp t-only"><h3>학습목표</h3><ol class="goals"><li>① 9차시 기획서를 바탕으로 캠페인 산출물(포스터, 카드뉴스, 영상 스토리보드, 리플릿, 방송 멘트 등)을 모둠 역할에 따라 완성한다.</li><li>② 정확성·존중·겁주지 않기·행동 제시·출처 표기의 기준으로 산출물을 점검하고, 이미지·글꼴·음악의 출처와 초상권을 확인해 밝힌다.</li><li>③ 산출물을 공유하고 서로의 제안을 받아들이며, 1~10차시를 돌아보고 자신의 변화와 앞으로의 약속을 정리한다.</li></ol>
+<h3>수업 흐름 <small>45분</small></h3><div class="flow" role="img" aria-label="도입 6분, 전개 29분, 정리 10분"><i style="flex:6"><b>도입</b>6분</i><i style="flex:29"><b>전개</b>29분</i><i style="flex:10"><b>정리</b>10분</i></div>
+<ul class="fl"><li><b>도입</b>9차시 기획서를 다시 읽으며 오늘 할 일(제작 → 점검 → 공유 → 성찰)과 모둠 역할을 확인한다.</li><li><b>전개</b>출처 표기 방법을 알고 산출물을 제작한다. 점검 기준 5가지로 점검·수정한 뒤 갤러리 방식으로 공유하며 제안을 주고받는다. 우리 반 약속과 도움 창구를 함께 게시할 내용으로 정리한다.</li><li><b>정리</b>개인 성찰지를 쓰며 처음과 지금의 변화, 가장 도움이 된 도구, 앞으로의 약속을 정리한다.</li></ul>
+<h3>평가</h3><p>상·중·하 평가계획 4영역</p>
+<h3>수업 전 확인</h3><ul class="nts"><li>사전·사후 진단 설문을 이 차시에 할지는 연구회에서 정해야 합니다.</li><li>도움 창구 번호는 게시 전에 최신 여부를 확인하세요.</li></ul></div>
+<div class="sp s-only"><h3>이 시간에 해요</h3><ul class="todo"><li>기획서대로 캠페인을 완성해요.</li><li>출처와 정확성을 짝 모둠과 점검해요.</li><li>공유하고 나의 변화를 돌아봐요.</li></ul></div>
+</div>
+<div class="dl"><div class="t-only"><a class="btn main" href="files/10/10%EC%B0%A8%EC%8B%9C_%EC%9E%90%EB%A3%8C%EB%AC%B6%EC%9D%8C.zip" download="10차시_자료묶음.zip">지도안·활동지·슬라이드 묶음 <small>zip</small></a><a class="btn" href="files/10/10%EC%B0%A8%EC%8B%9C_%EA%B5%90%EC%88%98%ED%95%99%EC%8A%B5%EC%A7%80%EB%8F%84%EC%95%88.hwpx" download="10차시_교수학습지도안.hwpx">지도안 <small>hwpx</small></a><a class="btn" href="files/10/10%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="10차시_학생활동지.docx">활동지 <small>docx</small></a><a class="btn" href="files/10/10%EC%B0%A8%EC%8B%9C_%EC%88%98%EC%97%85%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C.pptx" download="10차시_수업슬라이드.pptx">슬라이드 <small>pptx</small></a></div>
+<div class="s-only"><a class="btn main" href="files/10/10%EC%B0%A8%EC%8B%9C_%ED%95%99%EC%83%9D%ED%99%9C%EB%8F%99%EC%A7%80.docx" download="10차시_학생활동지.docx">10차시 활동지 받기 <small>docx</small></a></div></div>
+</div>
+<div class="xp s-only" id="xp10"></div>
+</div></section><section class="srcg" id="source" aria-labelledby="hs"><div class="in">
+<div><h2 id="hs">출처, 이렇게 확인하고<br>이렇게 적어요</h2><p class="lead">출처는 “이 정보를 누가, 언제, 어디에서 말했는가”예요. 확인하는 방법 5단계와 적는 방법을 차례대로 알아봐요.</p></div>
+<div><h3>1. 출처 확인하는 방법 5단계</h3>
+<ol class="st">
+<li><b>만든 사람 찾기</b>글 끝, 소개란, 누리집의 “소개” 쪽에서 사람이나 기관 이름을 찾아요. 이름이 없거나 숨겨져 있으면 “확인 불가”라고 적어요.</li>
+<li><b>날짜 확인하기</b>올린 날과 고친 날을 확인해요. 오래된 글은 지금과 다를 수 있어요. 날짜가 없으면 “확인 불가”예요.</li>
+<li><b>원자료 열어 보기</b>글에 나온 숫자·연구·말을 그 이름으로 검색하고, 링크가 있으면 눌러서 원문까지 가요. 원문에 그 내용이 실제로 있는지 직접 읽어요.</li>
+<li><b>다른 곳에서 다시 확인하기</b>서로 베끼지 않은 곳 2군데 이상에서 확인해요. 공공기관 누리집, 도서관 자료, 언론사 원문이 좋아요. 이미지는 “이미지로 검색” 기능으로 처음 올라온 곳을 찾아봐요.</li>
+<li><b>확인 결과 적기</b>“확인됨 / 확인 안 됨 / 알 수 없음” 중 하나와 확인한 날을 적어요. 못 찾았다고 “가짜”라고 단정하지 않고 “확인 안 됨”까지만 말해요.</li>
+</ol>
+<div class="box" style="margin-top:12px"><b>주소 확인 요령</b><ul><li>주소 끝이 go.kr이면 정부 기관 누리집일 가능성이 높아요. 하지만 비슷한 글자로 만든 가짜 주소도 있으니 철자를 한 글자씩 읽어요.</li><li>링크를 누르기 전에 주소가 글에 적힌 이름과 같은지 확인해요. 문자·메신저로 온 링크는 누르지 말고 공식 누리집에 직접 찾아 들어가요.</li><li>AI 답변에 나온 출처 이름은 만들어진 것일 수 있어요. 반드시 직접 검색해서 실제로 있는지 확인해요.</li><li>어려우면 사서교사와 함께 학교도서관 자료 검색이나 공식 자료 찾기를 해요.</li></ul></div></div>
+<div><h3>2. 출처 적는 방법</h3>
+<p class="lead" style="margin-bottom:12px">기본은 <b>만든 사람 · 제목 · 발행처(누리집·출판사) · 날짜 · 주소 · 확인한 날</b> 6가지예요. 글 속에서는 (만든 사람, 연도)처럼 짧게 쓰고, 글 끝 “참고 자료”에 전체를 적어요. 학교나 교과에서 정한 양식이 따로 있으면 그 양식을 따라요.</p>
+<div class="tw"><table><thead><tr><th>자료 종류</th><th>이렇게 적어요</th><th>예시 (예시 주소 사용)</th></tr></thead><tbody>
+<tr><td>웹페이지</td><td><code>만든 사람. 「글 제목」. 누리집 이름. 올린 날짜. 주소. (확인일)</code></td><td>예시교육청. 「정보 안전 안내」. 예시교육청 누리집. 2026.3.2. https://example.org/guide. (확인일: 2026.10.27)</td></tr>
+<tr><td>책</td><td><code>지은이. 『책 제목』. 출판사, 출판 연도. 쪽수.</code></td><td>예시지은이. 『정보를 읽는 법』. 예시출판사, 2024. 45-47쪽.</td></tr>
+<tr><td>뉴스 기사</td><td><code>기자. 「기사 제목」. 언론사, 날짜. 주소. (확인일)</code></td><td>예시기자. 「가짜 문자 주의보」. 예시일보, 2026.5.4. https://example.org/news. (확인일: 2026.10.27)</td></tr>
+<tr><td>영상</td><td><code>만든 사람(채널). 「영상 제목」. 올라온 곳, 날짜. 주소. (확인일)</code></td><td>예시채널. 「링크 누르기 전에」. 영상 공유 사이트, 2026.6.1. https://example.org/video. (확인일: 2026.10.27)</td></tr>
+<tr><td>이미지·그림</td><td><code>만든 사람. 「제목·설명」. 가져온 곳. 주소. 이용 조건. (확인일)</code></td><td>예시작가. 「책 읽는 학생」. 예시 이미지 누리집. https://example.org/img. 이용 조건: 출처 표기 필요. (확인일: 2026.10.27)</td></tr>
+<tr><td>AI 답변</td><td><code>AI 도구 이름. 질문한 날. 질문(요약). 원자료 확인 결과.</code></td><td>예시 AI 도구. 질문한 날: 2026.10.27. 질문: “청소년 수면 시간 기준”. 원자료 확인: 통계 누리집 발표 자료 확인됨.</td></tr>
+</tbody></table></div>
+<div class="box" style="margin-top:12px"><b>꼭 지켜요</b><ul><li>직접 만든 것은 “글·그림: ○○모둠”처럼 적어요. 가져온 것은 반드시 가져온 곳을 적어요.</li><li>AI 답변 자체는 근거가 아니에요. AI가 말한 출처를 직접 찾아 확인한 뒤, 그 원자료를 적어요.</li><li>이미지·음악·글꼴은 이용 조건을 확인해요. 출처를 쓸 수 없거나 이용 조건이 불분명하면 쓰지 않아요.</li><li>사람 얼굴 사진은 허락 없이 쓰지 않아요.</li><li>만든 사람이나 날짜를 못 찾았다면 비워 두지 말고 “확인 불가”라고 적어요.</li></ul></div></div>
+<div id="srctool"></div>
+</div></section><section class="cases s-only" id="cases" aria-labelledby="hc"><div class="in"><h2 id="hc">허위·과장 광고 도감</h2>
+<p class="lead">광고는 사고 싶게 만드는 글이에요. 그래서 말을 어떻게 하는지 읽는 힘이 필요해요. 카드를 눌러 “이렇게 읽어요”를 확인해 봐요.</p>
+<div class="flt" role="group" aria-label="유형 고르기"><button type="button" data-f="*" aria-pressed="true">전체</button><button type="button" data-f="단정" aria-pressed="false">단정</button><button type="button" data-f="속도" aria-pressed="false">속도</button><button type="button" data-f="전후·체험담" aria-pressed="false">전후·체험담</button><button type="button" data-f="권위" aria-pressed="false">권위</button><button type="button" data-f="재촉" aria-pressed="false">재촉</button><button type="button" data-f="수치·순위" aria-pressed="false">수치·순위</button><button type="button" data-f="숨은 대가" aria-pressed="false">숨은 대가</button></div><div class="cg"><div><button type="button" class="cd" aria-expanded="false" data-tags="단정,속도"><span class="ad">먹기만 하면 일주일에 5kg 쏙!</span><span class="ft"><span>단정 · 속도</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>누구에게나, 아무것도 안 해도, 일주일 만에라고 약속해요. 근거(누가·몇 명·어떻게 쟀는지)가 없어요.<b>확인 질문</b>실험을 누가 했나? 몇 명에게? 식단·운동은 어땠나?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="단정"><span class="ad">100% 천연, 부작용 0%</span><span class="ft"><span>단정</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>천연이라는 말이 곧 안전을 뜻하지는 않아요. 사람마다 달라서 0%와 100%는 증명하기 어려운 숫자예요.<b>확인 질문</b>무엇이 100%인가? 누가 확인했나?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="권위,수치·순위"><span class="ad">전문가들이 인정한 대한민국 1위</span><span class="ft"><span>권위 · 수치·순위</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>어떤 전문가인지, 어떤 기준의 1위인지 안 보여요.<b>확인 질문</b>누가, 언제, 무엇을 기준으로 1위라고 했나?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="재촉"><span class="ad">오늘 자정까지! 남은 수량 3개</span><span class="ft"><span>재촉</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>생각할 시간을 빼앗는 말이에요. 급할수록 확인 질문을 건너뛰기 쉬워요.<b>확인 질문</b>정말 오늘까지인가? 내일은 같은 조건이 없나?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="전후·체험담"><span class="ad">사용 전 vs 사용 후 (실제 고객 사진)</span><span class="ft"><span>전후·체험담</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>조명·각도·기간·보정에 따라 달라 보일 수 있어요. 한 사람의 경험이에요.<b>확인 질문</b>기간은? 보정은? 다른 조건은 같았나?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="수치·순위"><span class="ad">만족도 98%</span><span class="ft"><span>수치·순위</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>몇 명에게 누가 물었는지가 없으면 숫자만 큰 거예요.<b>확인 질문</b>몇 명에게 물었나? 누가 조사했나? 불만족 이유는?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="속도,단정"><span class="ad">누구나 이틀이면 영어 완성</span><span class="ft"><span>속도 · 단정</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>누구나, 완성의 기준이 없어요. 속도를 앞세워 마음을 끌어요.<b>확인 질문</b>완성의 기준은? 나에게도 해당하나?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="수치·순위,전후·체험담"><span class="ad">후기 3만 개 돌파!</span><span class="ft"><span>수치·순위 · 전후·체험담</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>후기 수는 양이에요. 어떤 후기인지가 더 중요해요.<b>확인 질문</b>같은 말 반복은 아닌가? 구매자가 쓴 건가?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="권위"><span class="ad">의사가 추천하는 제품</span><span class="ft"><span>권위</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>어느 분야 의사가 누구에게 어떤 이유로 추천했는지가 빠졌어요.<b>확인 질문</b>누가? 어떤 근거로? 대가를 받았나?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="숨은 대가"><span class="ad">공짜! 배송비만 내세요</span><span class="ft"><span>숨은 대가</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>공짜라는 말 뒤에 다른 대가(정기 결제, 개인정보 입력 등)가 있는지 살펴봐요.<b>확인 질문</b>무료 뒤에 내가 내는 것(돈·정보)은 무엇인가?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="재촉"><span class="ad">이 영상 안 보면 손해 봅니다</span><span class="ft"><span>재촉</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>못 보면 불안해지게 만드는 말이에요.<b>확인 질문</b>안 보면 정말 손해인가? 손해의 내용은 무엇인가?</span></button></div><div><button type="button" class="cd" aria-expanded="false" data-tags="권위"><span class="ad">유명 크리에이터도 쓰는 제품</span><span class="ft"><span>권위</span><span aria-hidden="true">눌러서 읽기</span></span><span class="bk"><b>이렇게 읽어요</b>유명하다고 믿을 만한 건 아니에요. 광고라는 표시가 있는지 살펴봐요.<b>확인 질문</b>광고 표시가 있나? 대가를 받았나?</span></button></div></div>
+<p class="note">법으로 어떤 광고가 허위·과장으로 판단되는지는 이 도감이 다루지 않아요. 궁금하면 선생님과 공식 안내에서 확인해요(확인 필요). 이 도감의 목적은 “이상하다”를 넘어 “무엇을 확인할까”를 정하는 거예요.</p></div></section>
+</main>
+
+<footer><div class="wrap">
+  <p class="t-only">지도안은 한글(hwpx) 파일입니다. 성취기준 코드는 넣지 않았으니 확인 후 추가하세요.</p>
+  <p>오색렌즈 교사연구회</p>
+</div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+
+<script>
+(function(){
+  var body=document.body, toastEl=document.getElementById('toast'), tt;
+  function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){toastEl.classList.remove('on')},3200)}
+  function setMode(m,save){
+    body.setAttribute('data-mode',m);
+    document.getElementById('m-teacher').setAttribute('aria-pressed',m==='teacher');
+    document.getElementById('m-student').setAttribute('aria-pressed',m==='student');
+    if(save){try{localStorage.setItem('mode',m)}catch(e){}}
+  }
+  var init='teacher';
+  try{var s=localStorage.getItem('mode');if(s==='student'||s==='teacher')init=s}catch(e){}
+  if(location.hash==='#student')init='student'; else if(location.hash==='#teacher')init='teacher';
+  setMode(init,false);
+  document.getElementById('m-teacher').addEventListener('click',function(){setMode('teacher',true)});
+  document.getElementById('m-student').addEventListener('click',function(){setMode('student',true)});
+  var dlp, dataP;
+  function getDl(){ if(!dlp){ dlp=(window.claude&&window.claude.use)?window.claude.use('downloads').catch(function(){return null}):Promise.resolve(null);} return dlp; }
+  function getData(){ if(!dataP){ dataP=fetch('data.json').then(function(r){if(!r.ok)throw new Error('http');return r.json()}); } return dataP; }
+  function bytes(b64){var s=atob(b64),u=new Uint8Array(s.length);for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
+  function zipOf(items){var z=new JSZip();items.forEach(function(it){z.file(it[0],bytes(it[1]))});return z.generateAsync({type:'blob',compression:'DEFLATE'})}
+  var MIME={docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation'};
+  function build(k,D){
+    var p=k.split(':'),t=p[0],n=p[1];
+    if(t==='s')return Promise.resolve({name:n+'차시_학생활동지.docx',blob:new Blob([bytes(D.s[n])],{type:MIME.docx})});
+    if(t==='p')return Promise.resolve({name:n+'차시_수업슬라이드.pptx',blob:new Blob([bytes(D.l[n])],{type:MIME.pptx})});
+    if(t==='b')return zipOf([[n+'차시_교수학습지도안.hwpx',D.p[n]],[n+'차시_학생활동지.docx',D.s[n]],[n+'차시_수업슬라이드.pptx',D.l[n]]]).then(function(b){return{name:n+'차시_자료묶음.zip',blob:b}});
+    var all=[],i;
+    if(n==='plans'){for(i=1;i<=10;i++)all.push([i+'차시_교수학습지도안.hwpx',D.p[i]]);all.push(['1-10차시_통합_교수학습지도안.hwpx',D.all]);return zipOf(all).then(function(b){return{name:'유해정보리터러시_지도안_전체.zip',blob:b}})}
+    if(n==='sheets'){for(i=1;i<=10;i++)all.push([i+'차시_학생활동지.docx',D.s[i]]);return zipOf(all).then(function(b){return{name:'유해정보리터러시_활동지_전체.zip',blob:b}})}
+    for(i=1;i<=10;i++)all.push([i+'차시_수업슬라이드.pptx',D.l[i]]);return zipOf(all).then(function(b){return{name:'유해정보리터러시_슬라이드_전체.zip',blob:b}});
+  }
+  window.XPAPI={getDl:getDl,toast:toast};var busy=false;
+  document.addEventListener('click',function(ev){
+    var b=ev.target.closest('[data-k]'); if(!b||busy) return;
+    busy=true; toast('파일을 준비하고 있어요.');
+    getDl().then(function(dl){
+      if(!dl){toast('이 화면에서는 저장을 지원하지 않아요. claude.ai에서 열어 주세요.');return}
+      return getData().then(function(D){return build(b.getAttribute('data-k'),D)}).then(function(f){
+        return dl.save({filename:f.name,data:f.blob}).then(function(){toast('저장했어요.')});
+      });
+    }).catch(function(e){
+      if(e&&e.code==='declined'){toast('저장을 취소했어요.');return}
+      toast('저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.');
+    }).then(function(){busy=false});
+  });
+})();
+</script>
+<script>(function(){
+'use strict';
+function h(t,a,c){var e=document.createElement(t);a=a||{};Object.keys(a).forEach(function(k){var v=a[k];if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)});(c||[]).forEach(function(x){if(x==null)return;e.appendChild(typeof x==='string'?document.createTextNode(x):x)});return e}
+function clr(e){while(e.firstChild)e.removeChild(e.firstChild)}
+function shell(n,title,sub){var r=document.getElementById('xp'+n);if(!r)return null;r.appendChild(h('div',{class:'xp-h'},[h('h3',{text:title}),h('span',{text:sub})]));var b=h('div',{class:'xp-box'});r.appendChild(b);r.appendChild(h('p',{class:'xnote',text:'여기서 한 선택과 입력은 저장·전송되지 않아요. 창을 닫으면 사라져요.'}));return b}
+function btn(text,fn,cls){return h('button',{type:'button',class:'xb'+(cls?' '+cls:''),onclick:fn,text:text})}
+function fb(label,text){return h('div',{class:'xfb'},[h('b',{text:label+' '}),text])}
+function cmp(box,sum,items){var d=h('details',{class:'xmore'},[h('summary',{text:sum})]);items.forEach(function(x){d.appendChild(h('div',{class:'xc'},[h('b',{text:x[0]}),h('p',{text:x[1]}),fb(x[3]||'이렇게 읽어요',x[2])]))});box.appendChild(d)}
+function stage(box){var s=h('div',{class:'xstage'});box.appendChild(s);return s}
+
+/* 1. 3초 판정 */
+function a1(){var box=shell(1,'3초 판정','카드를 3초만 보고 직감으로 고른 뒤, 5문으로 다시 봐요.');if(!box)return;
+var C=[
+{s:'급식 벌레 소문',t:'우리 학교 급식에 벌레가 나왔대. 지금 바로 단톡방 전부에 공유해!!',q:[0,2],g:1,n:'누가 말했는지 없고, 바로 퍼뜨리라고 재촉해요. 퍼뜨리지 말고 학교에 먼저 확인해요.'},
+{s:'계정 정지 문자',t:'지금 안 들어오면 계정이 정지됩니다. 아래 링크에서 비밀번호를 입력하세요.',q:[0,2],g:2,n:'비밀번호를 요구하며 겁을 줘요. 링크를 열지 말고 행동을 보류해요.'},
+{s:'쉬운 용돈 벌이',t:'하루 10분이면 월 300만 원! 청소년도 가능해요. 오픈채팅방에 들어와 신분증 사진을 보내 주세요.',q:[1,2],g:2,n:'근거 없는 큰 돈을 약속하고 신분증 사진을 요구해요. 개인정보를 보내지 않고 어른과 먼저 상의해요.'},
+{s:'위험 챌린지',t:'아무도 못 한다는 위험한 챌린지! 해 보면 짜릿해. 영상 올리면 인증해 줄게. 안 하면 겁쟁이~',q:[2,3],g:2,n:'위험한 행동을 부추기고 “겁쟁이”라며 압박해요. 따라 하지 않고 신고해요.'},
+{s:'친구 합성 사진',t:'우리 반 친구 사진 합성한 게 돌고 있어. 너도 봤지? 단톡방에 더 퍼뜨려 줘.',q:[0,2],g:2,n:'친구를 놀리는 합성물을 퍼뜨리라고 해요. 전달하지 않고, 화면을 남기고, 어른께 알려요.'},
+{s:'키 5cm 후기',t:'이 영양제 먹고 한 달 만에 키가 5cm 컸어요. 후기 보고 바로 사세요!',q:[1,3],g:1,n:'한 사람의 경험이고 다른 이유(성장기 등)는 따져 보지 않았어요. 건강 정보는 공식 자료로 확인해요.'}];
+var J=['믿을 만해요','추가 확인이 필요해요','위험해요 · 행동 보류'],Q=['① 출처','② 근거','③ 의도','④ 표현','⑤ 재확인'];
+var st={i:0,ph:1,a:[],b:[]},sg=stage(box);
+function pick(j){if(st.ph===1){st.a[st.i]=j;st.i++;if(st.i>=C.length){st.i=0;st.ph=2}}else{st.b[st.i]=j}draw()}
+function back(){if(st.i>0){st.i--}else if(st.ph===2){st.ph=1;st.i=C.length-1}draw()}
+function p2(t){return h('p',{text:t})}
+function draw(){clr(sg);
+ if(st.ph===3){summary();return}
+ var c=C[st.i];
+ sg.appendChild(h('h4',{text:(st.ph===1?'1단계 · 3초 직감':'2단계 · 5문으로 다시 보기')+'  '+(st.i+1)+'/'+C.length}));
+ sg.appendChild(h('div',{class:'xcard',text:c.t}));
+ if(st.ph===1){sg.appendChild(h('div',{class:'xbar'},[h('i')]));sg.appendChild(p2('막대가 줄어드는 동안 직감으로 골라요. 시간이 지나도 괜찮아요.'))}
+ else{sg.appendChild(h('div',{class:'xp-row'},c.q.map(function(k){return h('span',{class:'xtag',text:'먼저 볼 질문 '+Q[k]})})));sg.appendChild(p2('처음 고른 판정: '+J[st.a[st.i]]+' / 다시 눌러 바꿀 수 있어요.'))}
+ sg.appendChild(h('div',{class:'xp-row'},J.map(function(x,j){var b=btn(x,function(){pick(j)});if(st.ph===2)b.setAttribute('aria-pressed',st.b[st.i]===j);return b})));
+ if(st.ph===2&&st.b[st.i]!==undefined){var ok=st.b[st.i]===c.g;sg.appendChild(fb(ok?'맞아요. 이 카드의 답은 “'+J[c.g]+'”':'이 카드의 답은 “'+J[c.g]+'”예요',c.n));if(!ok)sg.appendChild(p2('다른 걸 눌러 다시 골라 볼 수 있어요.'));sg.appendChild(btn(st.i===C.length-1?'결과 보기':'다음 카드',function(){st.i++;if(st.i>=C.length){st.i=0;st.ph=3}draw()},'solid'))}
+ if(st.i>0||st.ph===2)sg.appendChild(btn('이전 카드',back))}
+function summary(){var ch=0,hit=0;
+ var rows=C.map(function(c,i){var d=st.a[i]!==st.b[i];if(d)ch++;if(st.b[i]===c.g)hit++;return h('tr',{},[h('td',{text:c.s}),h('td',{text:J[st.a[i]]}),h('td',{text:J[st.b[i]]}),h('td',{text:J[c.g]+(st.b[i]===c.g?' ✓':'')}),h('td',{text:d?'바뀜':'그대로'})])});
+ sg.appendChild(h('h4',{text:'처음 판정과 다시 본 판정'}));
+ sg.appendChild(h('div',{class:'xtw'},[h('table',{class:'xtbl'},[h('tr',{},['카드','3초 직감','5문 이후','이 수업의 답','변화'].map(function(x){return h('th',{text:x})}))].concat(rows))]));
+ sg.appendChild(h('p',{class:'xscore',text:'수업의 답과 같은 카드 '+hit+'/'+C.length+' · 바뀐 카드 '+ch+'개'}));
+ sg.appendChild(fb('생각해 볼 점','3초 직감과 5문 이후가 달라졌다면, 5문으로 확인할 말이 생겼다는 뜻이에요. 직감이 이미 맞았더라도 이유를 한 문장으로 말해 봐요. 틀린 카드는 “이전 카드”로 돌아가 다시 골라도 돼요.'));
+ sg.appendChild(btn('다시 해 보기',function(){st={i:0,ph:1,a:[],b:[]};draw()},'solid'))}
+cmp(box,'비교 예시 · 믿을 만한 정보는 어떻게 생겼을까?',[['학교 알림장 안내','다음 주 수요일은 행사로 단축수업입니다. 자세한 시간은 학교 누리집 공지에서 확인하세요.','보낸 곳이 밝혀져 있고, 다른 곳(누리집)에서 다시 확인할 길을 알려 줘요. 급하게 재촉하지 않아요.'],['도서관 소식','시립도서관은 11월부터 토요일 개방을 1시간 연장합니다. (시립도서관 누리집 공지)','출처가 적혀 있고, 누리집에서 직접 확인할 수 있어요.']]);
+draw()}
+
+/* 2. 출처 따라가기 */
+function a2(){var box=shell(2,'출처 따라가기','AI 답변 속 출처를 3단계로 따라가 봐요. (가상 상황)');if(!box)return;
+var T=[
+{b:'제목이나 기관 이름으로 직접 찾아봐요.',q:'AI가 이렇게 답했어요. “2019년 국제건강정보연구원 보고서에 따르면 이 에너지 음료를 하루 한 병 마신 청소년의 집중력이 78% 올랐습니다.” 먼저 무엇을 해 볼까요?',o:[['보고서 제목으로 도서관·학술 검색','g','좋은 선택. 검색 결과 0건. 비슷한 제목도 찾기 어려워요.'],['기관 이름으로 검색','g','좋은 선택. 같은 이름의 기관 누리집이 보이지 않아요.'],['78%만 AI에게 다시 물어보기','r','아쉬운 선택. AI가 같은 말을 또 해요. 확인이 아니라 같은 답을 한 번 더 들은 거예요.']]},
+{b:'공식 목록을 보거나 사서에게 물어봐요.',q:'다음에는 무엇을 해 볼까요?',o:[['기관 공식 누리집에서 발간물 목록 보기','g','좋은 선택. 목록에 그 보고서가 없어요.'],['같은 숫자를 쓴 다른 글 찾기','r','아쉬운 선택. 같은 숫자를 쓴 글은 있지만 모두 출처를 적지 않았어요. 서로 베꼈을 수도 있어요.'],['사서 선생님께 물어보기','g','좋은 선택. 공식 자료를 찾는 방법을 같이 알아봐 줘요.']]},
+{b:'“확인되지 않아요”까지만 말하고 다른 근거를 찾아요.',q:'지금까지 결과로 이 출처는 어떻게 말하면 좋을까요?',o:[['있다고 확인됐어요','r','아쉬운 선택. 찾지 못했으니 “있다”고 하기는 어려워요.'],['확인되지 않아요. 그래서 이 숫자는 쓰지 않고 다른 근거를 찾아요','g','가장 좋은 선택. 좋아요. 없다고 단정하지 않고 “확인 안 됨”까지만 말하는 방식이에요.'],['AI가 지어낸 게 분명해요','r','아쉬운 선택. 그럴 가능성은 있어요. 하지만 “분명”이라고 하려면 더 확인해야 해요. 확인 안 됨까지만 말해요.']]}];
+var i=0,sg=stage(box);
+function draw(){clr(sg);
+ if(i>=T.length){sg.appendChild(h('h4',{text:'정리'}));sg.appendChild(h('p',{text:'이름 확인 → 발행처 확인 → 같은 내용 다시 확인. 이 세 걸음을 거쳐도 못 찾으면 “확인되지 않았다”고 말하고 그 정보는 쓰지 않아요.'}));sg.appendChild(btn('처음부터',function(){i=0;draw()},'solid'));return}
+ var t=T[i],res=h('div',{class:'xstage'});
+ sg.appendChild(h('h4',{text:'단계 '+(i+1)+'/3'}));sg.appendChild(h('div',{class:'xcard',text:t.q}));
+ var row=h('div',{class:'xgrid'});
+ t.o.forEach(function(o){var b=btn(o[0],function(){Array.prototype.forEach.call(row.children,function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');clr(res);res.appendChild(fb(o[1]==='g'?'맞아요':'다시 생각해요',o[2]));res.appendChild(fb('이 단계의 답',t.b));res.appendChild(h('p',{text:'다른 선택지를 눌러 다시 골라 볼 수 있어요.'}))});row.appendChild(b)});
+ sg.appendChild(row);sg.appendChild(res);sg.appendChild(btn('다음 단계',function(){i++;draw()},'solid'))}
+cmp(box,'비교 예시 · 출처가 확인되는 경우',[['확인되는 출처','“○○ 통계 누리집의 2025년 발표 자료 표 3에 이 숫자가 있어요.”','만든 기관을 찾을 수 있고, 원문을 열어 숫자가 실제로 있는지 읽었고, 다른 곳에서도 같은 숫자가 확인돼요. 이 세 가지가 되면 “확인됨”이라고 적어요.','왜 확인됐다고 할까요?']]);
+draw()}
+
+/* 3. 추천 시뮬레이터 */
+function a3(){var box=shell(3,'추천 시뮬레이터','영상마다 어떻게 봤는지 고르면, 다음 피드가 어떻게 바뀌는지 봐요. (수업용 단순 모델)');if(!box)return;
+var V=[['유명인 논란 충격 폭로 영상','논란'],['위험한 챌린지 성공 모음','위험 챌린지'],['특정 집단 조롱 클립 모음','조롱'],['일주일 굶기 단식 인증','극단 다이어트'],['고양이가 박스에 끼는 영상','동물'],['시험 일주일 전 공부법','공부']];
+var A=[['끝까지',2],['좋아요',2],['공유',3],['잠깐',1],['건너뜀',-1]];
+var who='me',S={me:V.map(function(){return[]}),fr:V.map(function(){return[]})},res={me:null,fr:null};
+var top=h('div',{class:'xp-row'}),list=h('div',{class:'xgrid'}),out=h('div',{class:'xgrid'});
+var bm=btn('나',function(){who='me';draw()}),bf=btn('친구',function(){who='fr';draw()});
+top.appendChild(bm);top.appendChild(bf);
+box.appendChild(h('p',{class:'xnote',text:'논란·위험 챌린지·조롱·극단 다이어트는 자극적이거나 위험할 수 있는 영상이에요. 동물·공부는 비교용이에요.'}));box.appendChild(top);box.appendChild(list);
+box.appendChild(h('div',{class:'xp-row'},[btn('다음 피드 만들기',make,'solid')]));box.appendChild(out);
+function draw(){bm.setAttribute('aria-pressed',who==='me');bf.setAttribute('aria-pressed',who==='fr');clr(list);
+ V.forEach(function(v,vi){var cur=S[who][vi],row=h('div',{class:'xp-row'});
+  A.forEach(function(a,ai){var on=cur.indexOf(ai)>=0,b=btn(a[0],function(){var s=S[who][vi];if(ai===4)S[who][vi]=on?[]:[4];else{s=s.filter(function(x){return x!==4});S[who][vi]=on?s.filter(function(x){return x!==ai}):s.concat(ai)}draw()});b.setAttribute('aria-pressed',on);row.appendChild(b)});
+  list.appendChild(h('div',{class:'xc'},[h('b',{text:v[0]}),row]))})}
+function make(){res[who]=V.map(function(v,vi){return{c:v[1],p:S[who][vi].reduce(function(s,a){return s+A[a][1]},0)}}).sort(function(a,b){return b.p-a.p});show()}
+function show(){clr(out);[['me','나의 다음 피드'],['fr','친구의 다음 피드']].forEach(function(k){var r=res[k[0]];if(!r)return;var mx=Math.max(1,r[0].p);
+ out.appendChild(h('div',{class:'xc'},[h('b',{text:k[1]})].concat(r.map(function(x,i){return h('div',{},[h('p',{text:(i+1)+'위 · '+x.c+'  '+x.p+'점'}),h('div',{class:'xbar',style:'animation:none'},[h('i',{style:'animation:none;width:'+Math.max(0,x.p/mx*100)+'%'})])])}))))});
+ if(res.me&&res.fr){out.appendChild(fb('비교','같은 영상 6개를 봐도 어떻게 봤는지에 따라 1위가 '+(res.me[0].c===res.fr[0].c?'같아요':'달라요')+'. 나의 1위: '+res.me[0].c+' / 친구의 1위: '+res.fr[0].c))}
+ else out.appendChild(fb('해 보기','위의 “친구”를 눌러 친구라면 어떻게 봤을지도 만들어 비교해 봐요.'));
+ out.appendChild(fb('정리','추천은 내가 반응한 주제를 더 보여 주는 방식이에요. 끝까지 보기·좋아요·공유는 모두 “좋아한다”로 읽혀서 같은 주제가 위로 올라와요. 그래서 자극적이거나 위험한 영상을 호기심에 끝까지 보면 비슷한 영상이 더 많이 나와요. 보고 싶지 않다면 건너뛰기, “관심 없음”, 신고를 눌러요.'));out.appendChild(fb('주의','실제 서비스의 계산 방식은 공개되지 않았어요. 이건 수업용 단순 모델이에요.'))}
+draw()}
+
+/* 4. 좋아요 3개 실험 */
+function a4(){var box=shell(4,'좋아요 3개 실험','하트 3개만 눌러도 피드 순서가 바뀌어요. (practice 버전)');if(!box)return;
+var I=[['논란','연예계 충격 폭로 요약'],['위험 챌린지','위험 챌린지 성공 모음'],['극단 다이어트','일주일 굶기 인증'],['동물','졸린 고양이 모음'],['논란','누가 잘못했나 댓글 전쟁'],['위험 챌린지','난이도 올린 챌린지 2탄'],['극단 다이어트','체중 감량 전후 사진 모음'],['공부','수행평가 계획 짜기']];
+var hearts=[],runs=[],after=null,sg=stage(box);
+function draw(){clr(sg);
+ sg.appendChild(h('p',{text:'마음에 드는 영상 3개에 하트를 눌러요. ('+hearts.length+'/3)'}));
+ var ul=h('ul',{class:'xfeed'});
+ (after||I.map(function(x,i){return i})).forEach(function(i,n){var on=hearts.indexOf(i)>=0;
+  ul.appendChild(h('li',{},[h('b',{text:String(n+1)}),h('span',{text:I[i][1]}),h('em',{text:I[i][0]}),h('button',{type:'button',class:'xheart','aria-label':I[i][1]+' 하트','aria-pressed':on,text:on?'♥':'♡',onclick:function(){if(on)hearts=hearts.filter(function(x){return x!==i});else if(hearts.length<3)hearts.push(i);else return;draw()}})]))});
+ sg.appendChild(ul);
+ sg.appendChild(h('div',{class:'xp-row'},[btn('피드 새로 고침',refresh,'solid'),btn('처음 상태로',function(){hearts=[];after=null;draw()})]));
+ if(runs.length)sg.appendChild(fb('지난 실험',runs.map(function(r,i){return (i+1)+'회: '+r}).join('  /  ')));
+ if(after)sg.appendChild(fb('봐요','하트를 누른 주제가 위로 올라왔어요. 자극적이거나 위험한 영상에 하트를 누르면 비슷한 영상이 위에 몰려요. 내가 고른 건 3번뿐인데 화면 전체가 바뀌었어요.'))}
+function refresh(){if(!hearts.length){return}var cs={};hearts.forEach(function(i){cs[I[i][0]]=(cs[I[i][0]]||0)+1});
+ after=I.map(function(x,i){return i}).sort(function(a,b){return (cs[I[b][0]]||0)-(cs[I[a][0]]||0)||a-b});
+ runs.push(Object.keys(cs).map(function(k){return k+' '+cs[k]}).join(', '));draw()}
+draw()}
+
+/* 5. 안전 화면 설계 */
+function a5(){var box=shell(5,'안전 화면 설계','유해정보가 닿았을 때 쓸 안전 기능을 가상 앱 “모두톡”의 5곳에 붙여 봐요.');if(!box)return;
+var SL=[['가입 화면','처음 만나는 곳이에요. 설정을 미리 안내할 수 있어요.'],['프로필','나를 보여 주는 곳이에요. 누가 볼 수 있는지가 중요해요.'],['채팅방','낯선 사람과 닿는 곳이에요.'],['댓글','불쾌한 말이 오가기 쉬운 곳이에요.'],['공유 버튼','퍼뜨리기 직전의 곳이에요.']];
+var F={'신고하기':'위험하거나 불쾌한 걸 바로 알릴 수 있어요.','차단하기':'원하지 않는 사람과 바로 거리를 둘 수 있어요.','알림 끄기':'쏟아지는 알림에서 잠깐 벗어날 수 있어요.','공개 범위 설정':'누가 볼 수 있는지 내가 고를 수 있어요.','공유 전 확인 창':'“정말 퍼뜨릴까요? 출처 확인했나요?” 하고 한 번 멈춰 줘요.','도움 연결 버튼':'어른이나 상담 창구에 연결되는 길이 보여요.'};
+var REC={'가입 화면':['공개 범위 설정'],'프로필':['공개 범위 설정','차단하기'],'채팅방':['도움 연결 버튼','차단하기','알림 끄기'],'댓글':['신고하기','차단하기'],'공유 버튼':['공유 전 확인 창']};var names=Object.keys(F),sel=SL.map(function(){return''}),out=h('div',{class:'xstage'}),grid=h('div',{class:'xgrid'});
+SL.forEach(function(s,i){var se=h('select',{class:'xin','aria-label':s[0]+'에 붙일 기능',onchange:function(e){sel[i]=e.target.value}},[h('option',{value:'',text:'기능 고르기'})].concat(names.map(function(n){return h('option',{value:n,text:n})})));grid.appendChild(h('div',{class:'xc'},[h('b',{text:s[0]}),h('p',{text:s[1]}),se]))});
+box.appendChild(grid);box.appendChild(btn('내 설계 확인',function(){clr(out);var used={};
+ SL.forEach(function(s,i){if(!sel[i]){out.appendChild(fb(s[0],'아직 비어 있어요.'));return}used[sel[i]]=1;var good=REC[s[0]].indexOf(sel[i])>=0;out.appendChild(fb((good?'맞아요 · ':'다시 생각해요 · ')+s[0]+' → '+sel[i],good?F[sel[i]]:'이 자리의 답은 “'+REC[s[0]][0]+'”예요. '+F[REC[s[0]][0]]))});
+ var miss=names.filter(function(n){return!used[n]});
+ 
+ out.appendChild(fb('정리','가입 화면·프로필에는 “공개 범위 설정”, 댓글에는 “신고하기”, 채팅방에는 “도움 연결 버튼”, 공유 버튼에는 “공유 전 확인 창”이 가장 잘 어울려요. 선택 상자를 바꿔 다시 확인할 수 있어요.'))},'solid'));box.appendChild(out)}
+
+/* 6,7 형광펜 */
+function markup(n,title,sub,types,items,more){var box=shell(n,title,sub);if(!box)return;
+var tl={};types.forEach(function(t){tl[t.k]=t});
+var legend=h('div',{class:'xp-row'},types.filter(function(t){return t.k!=='ok'}).map(function(t){return h('span',{class:'xtag',text:t.l})}));
+box.appendChild(legend);var found=h('p',{class:'xscore',text:''});var total=0,done=0;
+function addItem(it,parent){var card=h('div',{class:'xc'}),txt=h('div',{class:'xcard'}),pan=h('div',{class:'xstage'});
+ txt.appendChild(h('div',{},[h('b',{text:it.h})]));
+ var body=h('div',{});
+ it.p.forEach(function(p){if(!p[1]){body.appendChild(document.createTextNode(p[0]));return}
+  total++;var done1=false,sp=h('span',{class:'xseg',role:'button',tabindex:'0',text:p[0]});
+  var last=null;function render(f){clr(pan);pan.appendChild(h('p',{text:'“'+p[0].trim()+'” — 이 말은 어떤 유형일까요?'}));
+   pan.appendChild(h('div',{class:'xp-row'},types.map(function(t){var b=btn(t.l,function(){last=t.k;var ok=t.k===p[1];if(ok&&!done1){done1=true;done++;found.textContent='맞힌 문구 '+done+'/'+total}if(ok)sp.setAttribute('data-t',p[1]);else sp.removeAttribute('data-t');
+    render(ok?fb('정답이에요: '+tl[p[1]].l,p[2]):fb('정답은 “'+tl[p[1]].l+'”예요',p[2]))});b.setAttribute('aria-pressed',last===t.k);return b})));
+   if(f){pan.appendChild(f);if(last!==p[1])pan.appendChild(h('p',{text:'위에서 다른 유형을 눌러 다시 골라 볼 수 있어요.'}))}}
+  function open(){render(null)}
+  sp.addEventListener('click',open);sp.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});body.appendChild(sp)});
+ txt.appendChild(body);card.appendChild(txt);card.appendChild(pan);parent.appendChild(card)}
+items.forEach(function(it){addItem(it,box)});if(more&&more.length){var dt=h('details',{class:'xmore'},[h('summary',{text:more[0]})]);more[1].forEach(function(it){addItem(it,dt)});box.appendChild(dt)}
+box.appendChild(found);found.textContent='맞힌 문구 0/'+total}
+function a6(){markup(6,'광고 번역기','점선 밑줄이 있는 문구를 눌러 어떤 과장 표현인지 골라요. 틀리면 다른 유형을 다시 눌러 봐요.',
+[{k:'a',l:'㉠ 단정'},{k:'b',l:'㉡ 속도'},{k:'c',l:'㉢ 전후·체험담'},{k:'d',l:'㉣ 권위 빌리기'},{k:'e',l:'㉤ 재촉'},{k:'f',l:'＋ 수치·순위'},{k:'g',l:'＋ 개인정보 요구'},{k:'ok',l:'큰 문제 없어 보여요'}],
+[{h:'[가상] 슬림핏 젤리',p:[['먹기만 하면 ','a','번역: “누구에게나, 아무것도 안 해도”라고 약속해요. 사람마다 다르다는 말이 빠졌어요.'],['일주일에 5kg 쏙! ','b','번역: 짧은 기간 안에 큰 변화를 약속하지만 근거(누가, 몇 명, 어떻게 쟀는지)가 없어요.'],['사용 전·후 실제 사진 ','c','번역: 한 사람의 사진이에요. 조명·각도·기간·보정에 따라 달라 보일 수 있어요.'],['오늘 자정까지!','e','번역: 생각할 시간을 줄이려는 말이에요. 급할수록 확인을 건너뛰기 쉬워요.']]},
+{h:'[가상] 집중쑥쑥 영양제',p:[['의사들이 추천한 ','d','번역: 어느 분야 의사가 어떤 근거로 추천했는지 없어요. 광고에 나온 사람의 신분도 확인 대상이에요.'],['100% 천연, 부작용 0%, ','a','번역: 0%와 100%는 증명하기 어려운 숫자예요. 천연이 곧 안전은 아니에요.'],['먹은 학생 98% 만족 ','f','번역: 몇 명에게 누가 물었는지가 없으면 숫자만 큰 거예요.'],['남은 수량 3개!','e','번역: 얼른 사게 만드는 말이에요. 정말 3개인지 확인할 길이 없어요.']]},
+{h:'[가상] 쉬운용돈 오픈채팅',p:[['하루 10분이면 시작! ','b','번역: 아주 짧은 시간에 큰 성과를 약속해요. 무슨 일을 하는지는 알려 주지 않아요.'],['월 300만 원 보장! ','f','번역: 근거 없는 큰 금액이에요. “보장”은 단정이기도 해요.'],['청소년도 가능, 신분증 사진만 보내면 바로 시작! ','g','번역: 신분증 사진은 함부로 보내면 안 되는 개인정보예요. 정말 필요한 일인지 확인하고 어른과 먼저 상의해요.'],['오늘 입장하는 10명만!','e','번역: 서둘러 들어오게 만드는 말이에요.']]},
+{h:'[가상] 수익 보장 리딩방',p:[['원금 손실 0, 수익 100% 보장! ','a','번역: 손실 0과 수익 100%를 보장한다는 말은 증명할 수 없어요. 단정이에요.'],['전문가들이 인정한 1위 분석팀 ','d','번역: 어떤 전문가인지, 무슨 기준의 1위인지가 없어요.'],['3일 만에 계좌 2배 인증 사진 ','c','번역: 한 사람의 화면 캡처예요. 일부만 보여 주거나 꾸밀 수도 있어요.'],['오늘 밤 12시 마감, 5자리 남음','e','번역: 급하게 결정하게 만드는 말이에요.']]}],
+['그 밖의 광고 예시 · 유해성은 낮지만 과장 표현을 연습해요',[
+{h:'[가상] 영어번개 앱',p:[['누구나 이틀 만에 영어 완성! ','b','번역: “완성”의 기준이 없고 “누구나”라고 단정해요. 속도를 앞세운 표현이에요.'],['전 세계 1위 앱 ','f','번역: 무엇을 기준으로, 언제, 누가 매긴 1위인지 안 보여요.'],['중학생 영어 학습용, 월 정기결제 ','ok','번역: 대상과 결제 방식을 밝힌 말이에요. 사실 정보에 가까워요.']]},
+{h:'[가상] 배터리 스티커',p:[['붙이기만 하면 배터리 3배! ','a','번역: 어떤 기기에서 어떻게 쟀는지가 없어요. “3배”는 단정하는 숫자예요.'],['유명 크리에이터도 쓰는 ','d','번역: 유명하다고 믿을 만한 건 아니에요. 광고라는 표시가 있는지 살펴봐요.'],['체험단 후기 “인생템!” ','c','번역: 체험단은 제품을 받고 썼을 수 있어요. 대가가 있는 후기일 수 있어요.'],['후기 3만 개 돌파','f','번역: 후기 수는 양이에요. 어떤 후기인지가 더 중요해요.']]}]])}
+function a7(){markup(7,'후기 수사','후기 속 문구를 눌러 어떤 단서인지 골라요. 틀리면 다른 유형을 다시 눌러 봐요.',
+[{k:'who',l:'누가 썼나'},{k:'miss',l:'무엇이 빠졌나'},{k:'tone',l:'어떻게 말하나'},{k:'rep',l:'반복·대가'},{k:'ok',l:'큰 문제 없어 보여요'}],
+[{h:'후기 A · 다이어트 젤리',p:[['[가입 1일 차 계정의 첫 후기] ','who','가입한 지 하루 된 계정이 쓴 첫 글이에요. 쓴 사람의 이력이 거의 없어요.'],['진짜 대박!!! 안 먹으면 후회해요. ','tone','감탄과 압박을 섞은 말투예요. 어떤 점이 왜 좋았는지가 없어요.'],['3일 만에 3kg 빠졌고 배고픔도 전혀 없어요. 단점은 하나도 없어요. ','miss','단점이나 한계가 한 줄도 없어요. 먹은 양·기간·몸 상태도 빠졌어요.'],['(제품을 제공받아 작성했습니다)','rep','대가를 받았다고 밝힌 건 정직한 표시예요. 다만 좋게 쓰도록 부담이 있을 수 있어요.']]},
+{h:'후기 B · 영양제',p:[['[하루에 후기 12개를 쓴 계정] ','who','같은 날 후기를 여러 개 쓰는 계정은 실제 사용 후기인지 살펴봐야 해요.'],['배송 빠르고 포장 좋아요. ','ok','확인 가능한 사실에 가까운 말이에요.'],['먹고 효과 있어요. ','miss','어떤 효과인지, 얼마나 먹었는지가 빠졌어요.'],['최고. 추천. 최고. 강추. ','rep','같은 말을 반복해요. 길이를 채운 글일 수 있어요.']]},
+{h:'후기 C · 판매자 계정',p:[['[판매자 계정으로 작성] ','who','판매하는 사람이 쓴 후기는 후기라기보다 홍보에 가까워요.'],['가격이 비싸지만 만족해요. ','ok','단점을 하나 밝혔어요. 그래도 판매자라는 사실이 중요해요.'],['“인생템 인정합니다!!” ','rep','다른 계정 후기에도 같은 문장이 있어요. 같은 사람이 쓴 걸 수도 있어요.']]}],
+['비교 예시 · 근거가 많은 후기는 어떻게 생겼을까?',[
+{h:'후기 D · 직접 산 사람',p:[['2주 써 봤어요. 첫 주에는 변화를 모르겠고 둘째 주부터 조금 나아진 것 같아요. ','ok','쓴 기간과 변화를 구체적으로 적었어요.'],['개인차 있을 수 있어요. ','ok','자기 경험의 한계를 밝혔어요.'],['내 돈으로 샀어요.','ok','대가 여부를 밝혔어요. 그래도 한 사람의 경험이에요.']]}]])}
+
+/* 8. 대응 상황 */
+function a8(){var box=shell(8,'대응 상황 고르기','멈추기 → 남기기 → 알리기 → 도움받기, 4단계로 골라 봐요.');if(!box)return;
+var SC=[{t:'무료 아이템 이벤트 DM',i:'모르는 계정에게 DM이 왔어요. “이벤트 당첨! 아래 링크에서 게임 아이디와 비밀번호를 입력하면 아이템을 드려요.”',s:[
+{n:'멈추기',o:[['링크는 누르지 않고 멈춰요','g','링크를 열기 전에 멈추는 게 가장 안전한 첫걸음이에요.'],['당첨이니까 일단 눌러 봐요','r','링크를 열면 가짜 로그인 화면에 닿을 수 있어요. 멈추지 못한 경우예요.'],['친구들한테도 알려 줘요','r','확인하기 전에 퍼뜨리면 친구도 위험해질 수 있어요.']]},
+{n:'남기기',o:[['대화 화면을 캡처하고 링크는 열지 않은 채 남겨요','g','나중에 신고하거나 도움받을 때 필요해요.'],['민망하니까 대화를 지워요','r','증거가 사라져서 도움받기 어려워져요.'],['상대에게 따져요','m','대화가 길어질수록 말려들 수 있어요.']]},
+{n:'알리기',o:[['앱의 신고 기능으로 신고하고 차단해요','g','같은 일을 겪을 사람을 줄여요.'],['그냥 두고 잊어요','m','나는 괜찮아도 다음 사람은 위험할 수 있어요.'],['비슷한 계정을 만들어 맞서요','r','다툼이 커지고 나도 위험해질 수 있어요.']]},
+{n:'도움받기',o:[['보호자나 선생님께 알려요. 혹시 입력했다면 부끄러워도 바로 말하고 비밀번호를 바꿔요','g','빨리 말할수록 할 수 있는 일이 많아요.'],['혼자 해결될 때까지 기다려요','r','시간이 지날수록 어려워질 수 있어요.'],['친구에게만 말하고 끝내요','m','친구가 도와줄 수 있지만, 어른의 도움이 필요한 일도 있어요.']]}]},
+{t:'게임머니 충전 대행',i:'온라인 친구가 알려 준 계정에서 “선입금하면 게임머니 2배로 충전”이라고 해요. 이미 돈을 보냈는데 아직 아무것도 오지 않았고, “한 번만 더 보내면 돌려줄게”라는 말이 와요.',s:[
+{n:'멈추기',o:[['더 보내지 않고 멈춰요','g','이미 보낸 돈보다 더 보내지 않는 게 먼저예요.'],['한 번만 더 보내 봐요','r','더 보내라는 말은 멈추지 못하게 하려는 신호일 수 있어요.'],['내가 더 빨리 모아서 해결해 봐요','r','혼자 만회하려는 마음이 피해를 키울 수 있어요.']]},
+{n:'남기기',o:[['결제 내역과 대화를 캡처해서 남겨요','g','어디로 얼마를 보냈는지가 도움받을 때 중요한 근거예요.'],['돈을 보낸 기록을 지워요','r','기록이 있어야 도움받기 쉬워요.'],['상대 말만 믿고 기다려요','m','기다리는 동안 상황이 악화될 수 있어요.']]},
+{n:'알리기',o:[['앱·결제 서비스의 신고 창구에 알려요','g','공식 신고 창구가 있으면 거기부터 알려요.'],['친구 계정이라 신고하지 않아요','m','아는 사람이어도 사기일 수 있어요. 신고는 벌주기가 아니라 막기예요.'],['SNS에 상대 이름을 올려요','r','확인 안 된 정보를 퍼뜨리면 나도 문제가 될 수 있어요.']]},
+{n:'도움받기',o:[['보호자와 선생님께 알려요. 필요하면 상담 창구를 함께 찾아봐요(연락처는 선생님과 공식 안내에서 확인해요)','g','어른과 함께 보면 할 수 있는 일을 정리하기 쉬워요.'],['부끄러워서 혼자 끙끙대요','r','실수가 아니라 속은 거예요. 도움을 구해도 괜찮아요.'],['같은 방법으로 다른 사람에게서 되찾아요','r','피해를 넘기는 일이 되어요.']]}]}];
+var tag={g:'도움이 되는 선택',m:'아쉬운 선택',r:'위험한 선택'};
+var sc=0,sg=stage(box),tabs=h('div',{class:'xp-row'});box.insertBefore(tabs,sg);
+SC.forEach(function(s,i){var b=btn(s.t,function(){sc=i;draw()});b.setAttribute('aria-pressed',i===0);tabs.appendChild(b)});
+function draw(){Array.prototype.forEach.call(tabs.children,function(b,i){b.setAttribute('aria-pressed',i===sc)});clr(sg);var s=SC[sc];
+ sg.appendChild(h('div',{class:'xcard',text:s.i}));
+ s.s.forEach(function(st,si){var res=h('div',{class:'xstage'}),row=h('div',{class:'xgrid'});
+  var best=st.o.filter(function(x){return x[1]==='g'})[0];st.o.forEach(function(o){var b=btn(o[0],function(){Array.prototype.forEach.call(row.children,function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');clr(res);res.appendChild(fb(tag[o[1]],o[2]));if(o[1]!=='g'){res.appendChild(fb('이 단계의 답',best[0]));res.appendChild(h('p',{text:'다른 선택지를 눌러 다시 골라 볼 수 있어요.'}))}});row.appendChild(b)});
+  sg.appendChild(h('div',{class:'xc'},[h('b',{text:(si+1)+'. '+st.n}),row,res]))})}
+draw();
+var sm=h('div',{class:'xstage'}),G={w:['저는','제 친구가'],a:['모르는 사람이 보낸 링크를 눌렀어요.','돈을 보냈는데 물건이 오지 않았어요.','기분 나쁜 메시지를 계속 받고 있어요.'],b:['오늘 있었던 일이에요.','며칠 전부터 계속되고 있어요.'],c:['어떻게 해야 할지 같이 봐 주세요.','신고하는 방법을 알려 주세요.','부모님께 말할 수 있게 도와주세요.']},ch={w:0,a:0,b:0,c:0},o2=h('div',{class:'xcard'});
+sm.appendChild(h('h4',{text:'도움 요청 문장 만들기'}));
+['w','a','b','c'].forEach(function(k){var row=h('div',{class:'xp-row'});G[k].forEach(function(x,i){var b=btn(x,function(){ch[k]=i;upd()});b.setAttribute('aria-pressed',i===0);b.setAttribute('data-k2',k);row.appendChild(b)});sm.appendChild(row)});
+sm.appendChild(o2);sm.appendChild(h('p',{text:'말하기 어려우면 이 문장을 그대로 보여 주기만 해도 돼요.'}));
+function upd(){Array.prototype.forEach.call(sm.querySelectorAll('[data-k2]'),function(b){var k=b.getAttribute('data-k2'),i=G[k].indexOf(b.textContent);b.setAttribute('aria-pressed',ch[k]===i)});o2.textContent=G.w[ch.w]+' '+G.a[ch.a]+' '+G.b[ch.b]+' '+G.c[ch.c]}
+box.appendChild(sm);upd()}
+
+/* 9. 메시지 점검기 */
+function a9(){var box=shell(9,'메시지 점검기','캠페인 메시지를 한 문장으로 써 보세요. 5가지 기준으로 점검해 줘요. (기계적 점검, 참고용)');if(!box)return;
+var ABS=['100%','무조건','절대','반드시','완벽','모두','항상','누구나','전부'],SC=['큰일','끔찍','무서','망한','죽','끝장','파멸'],DIS=['바보','멍청','한심','찌질'],ACT=/(해요|하자|해 봐요|해 보세요|확인|멈|물어|알려|신고|찾아|살펴)/;
+var ta=h('textarea',{class:'xin','aria-label':'캠페인 메시지',placeholder:'예) 퍼뜨리기 전에 출처를 한 번만 확인해요.',oninput:upd}),cb=h('input',{type:'checkbox',onchange:upd}),out=h('div',{class:'xstage'});
+box.appendChild(ta);box.appendChild(h('label',{class:'xp-row'},[cb,'이 메시지에 쓴 정보의 출처를 따로 적을 거예요.']));box.appendChild(out);
+function f(s,l){return l.filter(function(w){return s.indexOf(w)>=0})}
+function upd(){clr(out);var s=ta.value.trim();if(!s){out.appendChild(fb('안내','문장을 쓰면 바로 점검해요.'));return}
+ var a=f(s,ABS),c=f(s,SC),d=f(s,DIS),ex=(s.match(/!/g)||[]).length;
+ function row(ok,k,t){out.appendChild(fb((ok?'✓ ':'△ ')+k,t))}
+ row(!a.length,'정확',a.length?'단정하는 말이 있어요: '+a.join(', ')+'. 정말 그런지 근거가 있나요? “많은”, “~할 수 있어요”로 바꿀 수도 있어요.':'단정하는 말이 보이지 않아요.');
+ row(!d.length,'존중',d.length?'누군가를 깎아내리는 말이 있어요: '+d.join(', '):'깎아내리는 말이 보이지 않아요.');
+ row(!c.length&&ex<3,'겁주지 않기',c.length||ex>=3?'겁을 주는 말투일 수 있어요'+(c.length?': '+c.join(', '):'')+(ex>=3?' · 느낌표가 많아요':'')+'.':'겁을 주는 말이 보이지 않아요.');
+ row(ACT.test(s),'행동',ACT.test(s)?'읽는 사람이 무엇을 하면 좋은지가 보여요.':'무엇을 하면 좋은지가 없어요. “~해요”로 끝내 볼까요?');
+ row(cb.checked,'출처',cb.checked?'출처를 적기로 했어요. 꼭 적어요.':'출처 표기를 아직 정하지 않았어요.');
+ out.appendChild(h('p',{class:'xscore',text:'과장 경고 '+(a.length+c.length+(ex>=3?1:0))+'개'}));
+ if(s.length>60)out.appendChild(fb('길이','조금 길어요. 한 문장으로 줄여 볼까요?'))}
+upd()}
+
+/* 10. 나의 변화 카드 */
+function a10(){var box=shell(10,'나의 변화 카드','5문 확인 퀴즈를 풀고, 나만의 약속 카드를 만들어 이미지로 저장해요.');if(!box)return;
+var Q=[['“글쓴이 소개가 어디에도 없어요.”','① 출처','누가 만들었는지 알 수 없다는 건 출처 질문이에요.'],['“주장은 있는데 근거 자료 링크가 없어요.”','② 근거','주장을 받쳐 주는 근거가 없다는 뜻이에요.'],['“이 글은 나에게 결제하라고 해요.”','③ 의도','이 글이 나에게 원하는 행동을 살피는 질문이에요.'],['“무조건 100%라고 말해요.”','④ 표현','어떻게 말하는지, 즉 표현을 보는 질문이에요.'],['“같은 내용을 다른 믿을 만한 곳에서도 확인했어요.”','⑤ 재확인','다른 곳에서도 확인되는지 보는 질문이에요.']];
+var L=['① 출처','② 근거','③ 의도','④ 표현','⑤ 재확인'],sg=h('div',{class:'xstage'}),right=0,ans=0;box.appendChild(sg);
+var got=[];Q.forEach(function(q,qi){var res=h('div',{class:'xstage'}),row=h('div',{class:'xp-row'});L.forEach(function(l){var b=btn(l,function(){Array.prototype.forEach.call(row.children,function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');var ok=l===q[1];got[qi]=ok;clr(res);res.appendChild(fb(ok?'정답이에요: '+q[1]:'정답은 “'+q[1]+'”예요',q[2]));if(!ok)res.appendChild(h('p',{text:'다른 버튼을 눌러 다시 골라 볼 수 있어요.'}));var r=got.filter(Boolean).length,a=got.filter(function(x){return x!==undefined}).length;sc.textContent='맞힌 문항 '+r+'/5 · 푼 문항 '+a+'/5'});row.appendChild(b)});
+ sg.appendChild(h('div',{class:'xc'},[h('b',{text:(qi+1)+'. '+q[0]}),row,res]))});
+var sc=h('p',{class:'xscore',text:'맞힌 문항 0/5 · 푼 문항 0/5'});box.appendChild(sc);
+box.appendChild(h('h4',{text:'나의 약속 카드'}));
+var pick=0,col=0,COL=['#FFE14D','#BFE6FF','#C8F0DC'],row2=h('div',{class:'xp-row'}),inp=h('input',{class:'xin',type:'text',maxlength:'40','aria-label':'나의 약속 한 문장',placeholder:'예) 퍼뜨리기 전에 출처를 한 번만 확인할게요.',oninput:draw}),cv=h('canvas',{class:'xcv',width:'900',height:'520','aria-label':'약속 카드 미리보기'});
+L.forEach(function(l,i){var b=btn(l,function(){pick=i;Array.prototype.forEach.call(row2.children,function(x,j){x.setAttribute('aria-pressed',j===i)});draw()});b.setAttribute('aria-pressed',i===0);row2.appendChild(b)});
+var rc=h('div',{class:'xp-row'});COL.forEach(function(c,i){var b=btn('배경 '+(i+1),function(){col=i;draw()});b.style.background=c;b.style.color='#111';rc.appendChild(b)});
+box.appendChild(row2);box.appendChild(inp);box.appendChild(rc);box.appendChild(cv);
+box.appendChild(btn('이미지(PNG)로 저장',save,'solid'));
+function draw(){var g=cv.getContext('2d'),W=900,H=520;g.fillStyle=COL[col];g.fillRect(0,0,W,H);g.strokeStyle='#111';g.lineWidth=8;g.strokeRect(14,14,W-28,H-28);
+ g.fillStyle='#111';g.textBaseline='top';g.font='700 30px "Noto Sans KR",sans-serif';g.fillText('나의 약속 카드',56,56);
+ g.font='900 44px "Noto Sans KR",sans-serif';g.fillText('5문 중 '+L[pick],56,112);
+ var t=inp.value.trim()||'여기에 나의 약속이 들어가요.';g.font='700 40px "Noto Sans KR",sans-serif';
+ var lines=[],cur='';for(var i=0;i<t.length;i++){var n=cur+t[i];if(g.measureText(n).width>W-112&&cur){lines.push(cur);cur=t[i]}else cur=n}lines.push(cur);
+ lines.slice(0,4).forEach(function(l,i){g.fillText(l,56,214+i*58)});
+ g.font='500 22px "Noto Sans KR",sans-serif';g.fillText('오색렌즈 · 유해정보 리터러시',56,H-72)}
+function save(){var api=window.XPAPI;if(!api)return;draw();cv.toBlob(function(b){api.getDl().then(function(dl){if(!dl){var u=URL.createObjectURL(b),an=document.createElement('a');an.href=u;an.download='나의약속카드.png';document.body.appendChild(an);an.click();an.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);api.toast('이미지를 내려받았어요.');return}return dl.save({filename:'나의약속카드.png',data:b}).then(function(){api.toast('저장했어요.')})}).catch(function(e){api.toast(e&&e.code==='declined'?'저장을 취소했어요.':'저장하지 못했어요.')})},'image/png')}
+draw();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw)}
+
+/* 도감 필터 */
+function cases(){var root=document.getElementById('cases');if(!root)return;var fl=root.querySelectorAll('.flt button'),cds=root.querySelectorAll('.cd');
+ Array.prototype.forEach.call(fl,function(b){b.addEventListener('click',function(){var k=b.getAttribute('data-f');Array.prototype.forEach.call(fl,function(x){x.setAttribute('aria-pressed',x===b)});Array.prototype.forEach.call(cds,function(c){var show=k==='*'||(c.getAttribute('data-tags')||'').split(',').indexOf(k)>=0;c.parentNode.style.display=show?'':'none'})})});
+ Array.prototype.forEach.call(cds,function(c){c.addEventListener('click',function(){c.setAttribute('aria-expanded',c.getAttribute('aria-expanded')!=='true')})})}
+
+/* 출처 표기 만들기 */
+function srcTool(){var root=document.getElementById('srctool');if(!root)return;
+var td=new Date(),today=td.getFullYear()+'.'+(td.getMonth()+1)+'.'+td.getDate();
+var K={
+'웹페이지':{f:[['만든 사람 또는 기관','a','예) 예시교육청'],['글 제목','t','예) 정보 안전 안내'],['누리집 이름','s','예) 예시교육청 누리집'],['올린 날짜','d','예) 2026.3.2'],['주소(URL)','u','https://...'],['확인한 날','c',today]],fm:function(v){return v.a+'. 「'+v.t+'」. '+v.s+'. '+v.d+'. '+v.u+'. (확인일: '+v.c+')'}},
+'책':{f:[['지은이','a',''],['책 제목','t',''],['출판사','p',''],['출판 연도','y','예) 2024'],['쪽수(선택)','g','예) 45-47']],fm:function(v){return v.a+'. 『'+v.t+'』. '+v.p+', '+v.y+'.'+(v.g&&v.g!=='[빈칸]'?' '+v.g+'쪽.':'')}},
+'뉴스 기사':{f:[['기자 이름','a','없으면 비워 둬요'],['기사 제목','t',''],['언론사','p',''],['날짜','d','예) 2026.5.4'],['주소(URL)','u','https://...'],['확인한 날','c',today]],fm:function(v){return v.a+'. 「'+v.t+'」. '+v.p+', '+v.d+'. '+v.u+'. (확인일: '+v.c+')'}},
+'영상':{f:[['만든 사람(채널)','a',''],['영상 제목','t',''],['올라온 곳 이름','p','예) 영상 공유 사이트'],['올린 날짜','d',''],['주소(URL)','u','https://...'],['확인한 날','c',today]],fm:function(v){return v.a+'. 「'+v.t+'」. '+v.p+', '+v.d+'. '+v.u+'. (확인일: '+v.c+')'}},
+'이미지·그림':{f:[['만든 사람','a',''],['이미지 제목 또는 설명','t',''],['가져온 곳','s',''],['주소(URL)','u','https://...'],['이용 조건','l','예) 저작자 표시 필요 / 출처 표기 후 학교 수업용 사용 가능'],['확인한 날','c',today]],fm:function(v){return v.a+'. 「'+v.t+'」. '+v.s+'. '+v.u+'. 이용 조건: '+v.l+'. (확인일: '+v.c+')'}},
+'AI 답변':{f:[['AI 도구 이름','a',''],['질문한 날','d',today],['내가 입력한 질문(요약)','q',''],['AI가 말한 출처를 직접 찾아 확인했나요? 원자료 적기','o','못 찾았으면 “확인 안 됨”']],fm:function(v){return v.a+'. 질문한 날: '+v.d+'. 질문: “'+v.q+'”. 원자료 확인: '+v.o+'. (AI의 답은 근거가 아니에요. 원자료를 따로 적어요.)'}}};
+var names=Object.keys(K),kind=names[0],vals={},inputs={};
+var box=h('div',{class:'xp-box'}),row=h('div',{class:'xp-row'}),form=h('div',{class:'xgrid'}),out=h('div',{class:'xcard'}),warn=h('div',{class:'xstage'}),cp=btn('복사하기',function(){var t=out.textContent;try{navigator.clipboard.writeText(t).then(function(){if(window.XPAPI)window.XPAPI.toast('복사했어요.')},function(){if(window.XPAPI)window.XPAPI.toast('복사하지 못했어요. 글을 드래그해서 복사해요.')})}catch(e){if(window.XPAPI)window.XPAPI.toast('복사하지 못했어요. 글을 드래그해서 복사해요.')}},'solid');
+box.appendChild(h('h4',{text:'출처 표기 만들기'}));box.appendChild(row);box.appendChild(form);box.appendChild(h('h4',{text:'완성된 표기'}));box.appendChild(out);box.appendChild(warn);box.appendChild(cp);root.appendChild(box);
+names.forEach(function(n){var b=btn(n,function(){kind=n;draw()});b.setAttribute('data-n',n);row.appendChild(b)});
+function draw(){Array.prototype.forEach.call(row.children,function(b){b.setAttribute('aria-pressed',b.getAttribute('data-n')===kind)});clr(form);inputs={};
+ K[kind].f.forEach(function(f){var inp=h('input',{class:'xin',type:'text','aria-label':f[0],placeholder:f[2]||'',oninput:upd});if(f[1]==='c'||(f[1]==='d'&&kind==='AI 답변'))inp.value=f[2];inputs[f[1]]=inp;form.appendChild(h('label',{class:'xlab'},[h('span',{text:f[0]}),inp]))});upd()}
+function upd(){var v={},miss=[];K[kind].f.forEach(function(f){var x=inputs[f[1]].value.trim();if(!x){if(f[1]==='g'){x=''}else{miss.push(f[0]);x=(f[1]==='a'||f[1]==='d')&&kind!=='AI 답변'?'[확인 불가]':'[빈칸]'}}v[f[1]]=x});
+ out.textContent=K[kind].fm(v);clr(warn);
+ if(miss.length)warn.appendChild(fb('비어 있어요',miss.join(', ')+'. 찾아봤는데도 없으면 “확인 불가”라고 적어요. 만든 사람과 날짜를 알 수 없는 자료는 믿을 근거도 약해요.'));
+ else warn.appendChild(fb('좋아요','필요한 항목이 모두 채워졌어요. 학교나 교과에서 정한 양식이 따로 있으면 그 순서를 따라요.'))}
+draw()}
+
+function init(){[a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,cases,srcTool].forEach(function(f){try{f()}catch(e){if(window.console)console.error(f.name,e)}})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script></body></html>
